@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#244958">
+<meta name="robots" content="noindex, nofollow">
+<title>Personal Productivity Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#f5f6fa;--surface:#ffffff;--surface2:#f1f3f8;--border:#e3e6ee;--text:#0f172a;--muted:#64748b;
+  --primary:#4f46e5;--primary-2:#6366f1;--primary-soft:#eef2ff;--on-primary:#fff;
+  --danger:#dc2626;--warn:#d97706;--ok:#059669;--info:#0284c7;
+  --crit:#e11d48;--high:#ea580c;--med:#ca8a04;--low:#16a34a;
+  --q1:#e11d48;--q2:#4f46e5;--q3:#d97706;--q4:#64748b;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.06);
+  --shadow-lg:0 20px 50px rgba(15,23,42,.18);
+  --radius:14px;--radius-sm:10px;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0a0e18;--surface:#121826;--surface2:#1a2233;--border:#263044;--text:#e6eaf3;--muted:#94a3b8;
+  --primary:#818cf8;--primary-2:#a5b4fc;--primary-soft:rgba(129,140,248,.14);--on-primary:#0b1020;
+  --danger:#f87171;--warn:#fbbf24;--ok:#34d399;--info:#38bdf8;
+  --crit:#fb7185;--high:#fb923c;--med:#facc15;--low:#4ade80;
+  --q1:#fb7185;--q2:#818cf8;--q3:#fbbf24;--q4:#94a3b8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--primary)}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+svg{flex-shrink:0}
+
+/* ---------- Buttons & inputs ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);background:var(--surface);padding:9px 14px;border-radius:10px;font-weight:600;font-size:13.5px;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn-primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+.btn-danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn-danger:hover{filter:brightness(1.08);background:var(--danger)}
+.btn-ghost{background:transparent;border-color:transparent}
+.btn-block{width:100%}
+.btn-sm{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--muted);transition:.15s}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+.icon-btn.danger:hover{color:var(--danger)}
+.input,select.input,textarea.input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);outline:none;transition:.15s}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+textarea.input{resize:vertical;min-height:80px}
+label.lbl{display:block;font-weight:600;font-size:12.5px;margin:0 0 6px}
+.field{margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+/* ---------- Auth / setup ---------- */
+.center-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(1200px 600px at 10% -10%,var(--primary-soft),transparent),var(--bg)}
+.auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-lg);padding:30px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.brand-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#a855f7);display:grid;place-items:center;color:#fff}
+.auth-card h2{margin:22px 0 4px;font-size:21px;letter-spacing:-.02em}
+.auth-card p.sub{margin:0 0 20px;color:var(--muted)}
+.tabs{display:flex;gap:4px;background:var(--surface2);padding:4px;border-radius:11px;margin:20px 0}
+.tabs button{flex:1;border:0;background:transparent;padding:8px;border-radius:8px;font-weight:600;color:var(--muted)}
+.tabs button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.msg{padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px}
+.msg.error{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger)}
+.msg.ok{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+.msg.info{background:var(--primary-soft);color:var(--primary)}
+.link-btn{background:none;border:0;color:var(--primary);padding:0;font-weight:600}
+.auth-foot{margin-top:16px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* ---------- App layout ---------- */
+.app{display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 14px;overflow-y:auto;z-index:40}
+.sidebar .brand{padding:4px 8px 18px}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;padding:14px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13.5px;border:0;background:none;text-align:left;width:100%}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--primary-soft);color:var(--primary)}
+.nav-item .count{margin-left:auto;font-size:11px;background:var(--surface2);color:var(--muted);padding:1px 7px;border-radius:99px}
+.nav-item.active .count{background:var(--primary);color:var(--on-primary)}
+.nav-item .count.alert{background:var(--danger);color:#fff}
+.side-foot{border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+.user-chip{display:flex;align-items:center;gap:10px;padding:6px 8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.user-chip .em{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:14px 26px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar h1{font-size:19px;margin:0;letter-spacing:-.02em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--danger)}.dot.load{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.menu-btn{display:none}
+.content{padding:24px 26px 100px;max-width:1400px;width:100%}
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary),#a855f7);z-index:100;width:0;transition:width .3s;opacity:0}
+.progress.on{opacity:1;width:70%;transition:width 4s cubic-bezier(.1,.7,.2,1)}
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.45);z-index:35}
+.fab{display:none;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:18px;border:0;background:var(--primary);color:var(--on-primary);box-shadow:var(--shadow-lg);z-index:30;align-items:center;justify-content:center}
+
+/* ---------- Cards / grid ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card-h h3{margin:0;font-size:15px;letter-spacing:-.01em}
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:1.4fr 1fr}
+.g2e{grid-template-columns:1fr 1fr}
+.stat{padding:16px}
+.stat .k{font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+.stat .v{font-size:28px;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+.stat .s{font-size:12px;color:var(--muted)}
+.stat.danger .v{color:var(--danger)}.stat.warn .v{color:var(--warn)}.stat.ok .v{color:var(--ok)}.stat.pri .v{color:var(--primary)}
+.section-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:22px 0 10px}
+.section-title .pill{text-transform:none;letter-spacing:0}
+.pill{font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted);font-weight:700}
+.hero{background:linear-gradient(135deg,var(--primary),#9333ea);color:#fff;border:0;position:relative;overflow:hidden}
+.hero .eyebrow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
+.hero h2{margin:6px 0 8px;font-size:21px;letter-spacing:-.02em;word-break:break-word}
+.hero p{margin:0;opacity:.9;font-size:13.5px}
+.hero .hero-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.hero .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.25);color:#fff}
+.hero .btn:hover{background:rgba(255,255,255,.28)}
+.hero .big-score{position:absolute;right:18px;top:14px;font-size:44px;font-weight:800;opacity:.25}
+.empty{text-align:center;padding:34px 16px;color:var(--muted)}
+.empty .em-ic{font-size:30px;margin-bottom:6px}
+
+/* ---------- Task card ---------- */
+.list{display:flex;flex-direction:column;gap:10px}
+.task{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--lvl,var(--border));border-radius:12px;padding:12px 12px 12px 14px;box-shadow:var(--shadow);transition:.15s}
+.task:hover{border-color:color-mix(in srgb,var(--primary) 30%,var(--border));border-left-color:var(--lvl)}
+.task.lvl-critical{--lvl:var(--crit)}.task.lvl-high{--lvl:var(--high)}.task.lvl-medium{--lvl:var(--med)}.task.lvl-low{--lvl:var(--low)}
+.task.is-done{opacity:.7}
+.task.is-done .task-title{text-decoration:line-through;color:var(--muted)}
+.check{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);background:var(--surface);display:grid;place-items:center;color:transparent;margin-top:1px;flex-shrink:0;transition:.15s}
+.check:hover{border-color:var(--ok);color:var(--ok)}
+.check.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.task-body{flex:1;min-width:0}
+.task-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.task-title{margin:0;font-size:14.5px;font-weight:600;word-break:break-word}
+.task-desc{margin:4px 0 0;color:var(--muted);font-size:13px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.score{font-weight:800;font-size:13px;min-width:36px;height:26px;padding:0 8px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--lvl,var(--muted)) 14%,transparent);color:var(--lvl,var(--muted))}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.badge.lvl{background:color-mix(in srgb,var(--lvl) 14%,transparent);color:var(--lvl)}
+.badge.danger{background:color-mix(in srgb,var(--danger) 13%,transparent);color:var(--danger)}
+.badge.warn{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.badge.info{background:color-mix(in srgb,var(--info) 13%,transparent);color:var(--info)}
+.badge.ok{background:color-mix(in srgb,var(--ok) 13%,transparent);color:var(--ok)}
+.task-actions{display:flex;gap:2px;flex-shrink:0}
+details.why{margin-top:8px}
+details.why summary{cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;list-style:none}
+details.why summary::-webkit-details-marker{display:none}
+details.why summary::before{content:'▸ '}
+details.why[open] summary::before{content:'▾ '}
+.explain{margin-top:8px;background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:12.5px}
+.explain table{width:100%;border-collapse:collapse}
+.explain td{padding:3px 0}
+.explain td:last-child{text-align:right;font-weight:700}
+.explain tr.total td{border-top:1px solid var(--border);padding-top:6px;font-weight:800}
+.explain .bar{height:5px;background:var(--border);border-radius:9px;overflow:hidden;margin-top:2px}
+.explain .bar i{display:block;height:100%;background:var(--primary)}
+
+/* ---------- Toolbar ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.toolbar .input{width:auto;min-width:150px;flex:0 1 auto}
+.toolbar .search{flex:1 1 240px}
+.chk{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;user-select:none}
+.chk input{accent-color:var(--danger)}
+.result-info{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+
+/* ---------- Matrix ---------- */
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quad{background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--qc);border-radius:var(--radius);padding:14px;min-height:260px;display:flex;flex-direction:column;transition:.15s}
+.quad.over,.kcol.over{outline:2px dashed var(--primary);outline-offset:3px;background:var(--primary-soft)}
+.quad-h{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.quad-h h3{margin:0;font-size:14.5px;color:var(--qc)}
+.quad-h p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.quad .items{display:flex;flex-direction:column;gap:8px;flex:1}
+.mini{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:grab}
+.mini:active{cursor:grabbing}
+.mini.dragging{opacity:.4}
+.mini-top{display:flex;gap:8px;align-items:flex-start}
+.mini-title{flex:1;font-weight:600;font-size:13.5px;word-break:break-word;cursor:pointer}
+.mini-title:hover{color:var(--primary)}
+.mini .meta{margin-top:6px}
+.mini-move{display:flex;gap:6px;margin-top:8px;align-items:center}
+.mini-move select{padding:4px 8px;font-size:12px;border-radius:8px;width:auto;flex:1}
+
+/* ---------- Kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:14px;overflow-x:auto;padding-bottom:6px}
+.kcol{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;min-height:300px}
+.kcol-h{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:700}
+.kcol-h .kd{width:9px;height:9px;border-radius:50%}
+.kcol .items{display:flex;flex-direction:column;gap:8px;flex:1}
+
+/* ---------- Calendar ---------- */
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.cal-head h3{margin:0 8px 0 0;font-size:17px;min-width:170px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--border);gap:1px}
+.cal-dow{background:var(--surface2);padding:8px;font-size:11.5px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase}
+.cal-cell{background:var(--surface);min-height:104px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:.1s;text-align:left;border:0;border-radius:0}
+.cal-cell:hover{background:var(--surface2)}
+.cal-cell.other{background:color-mix(in srgb,var(--surface2) 60%,var(--surface));color:var(--muted)}
+.cal-cell.sel{box-shadow:inset 0 0 0 2px var(--primary)}
+.cal-num{font-size:12px;font-weight:700;width:24px;height:24px;display:grid;place-items:center;border-radius:50%}
+.cal-cell.today .cal-num{background:var(--primary);color:var(--on-primary)}
+.chip{font-size:11px;padding:2px 6px;border-radius:5px;background:color-mix(in srgb,var(--lvl) 15%,transparent);color:var(--lvl);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
+.chip.done{text-decoration:line-through;opacity:.6}
+.chip.lvl-critical{--lvl:var(--crit)}.chip.lvl-high{--lvl:var(--high)}.chip.lvl-medium{--lvl:var(--med)}.chip.lvl-low{--lvl:var(--low)}
+.more{font-size:11px;color:var(--muted);font-weight:600}
+
+/* ---------- Charts ---------- */
+.vbars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px}
+.vbar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.vbar .b{width:100%;max-width:44px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--primary-2),var(--primary));min-height:3px;position:relative;transition:height .4s}
+.vbar .b.zero{background:var(--border)}
+.vbar .val{font-size:11.5px;font-weight:700}
+.vbar .lb{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.vbar.today .lb{color:var(--primary);font-weight:700}
+.hbars{display:flex;flex-direction:column;gap:10px}
+.hbar-row{display:grid;grid-template-columns:130px 1fr 40px;gap:10px;align-items:center;font-size:12.5px}
+.hbar-row .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-track{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.hbar-track i{display:block;height:100%;border-radius:99px;background:var(--c,var(--primary))}
+.hbar-row .nv{text-align:right;font-weight:700}
+.ring{--p:0;width:118px;height:118px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--surface2) 0);display:grid;place-items:center;margin:0 auto}
+.ring::before{content:'';grid-area:1/1;width:88px;height:88px;border-radius:50%;background:var(--surface)}
+.ring span{grid-area:1/1;font-size:22px;font-weight:800;z-index:1}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:8px;border-bottom:1px solid var(--border)}
+table.tbl td{padding:9px 8px;border-bottom:1px solid var(--border)}
+table.tbl td.n{text-align:right;font-weight:600}
+.tbl-wrap{overflow-x:auto}
+
+/* ---------- Day groups ---------- */
+.day-group{margin-bottom:18px}
+.day-h{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.day-h b{font-size:14px}
+.day-h span{font-size:12px;color:var(--muted)}
+
+/* ---------- Modal ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(2,6,23,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);width:100%;max-width:620px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;animation:pop .18s}
+.modal.sm{max-width:420px}
+@keyframes pop{from{transform:translateY(8px) scale(.98);opacity:0}}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-h h3{margin:0;font-size:16px}
+.modal-b{padding:18px 20px;overflow-y:auto}
+.modal-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);flex-wrap:wrap}
+.range-wrap{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.range-wrap .rl{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600}
+.range-wrap .rl b{color:var(--primary)}
+.range-wrap input[type=range]{width:100%;accent-color:var(--primary)}
+.range-wrap .hint{font-size:11px;color:var(--muted)}
+.preview-score{display:flex;align-items:center;gap:12px;padding:12px;border:1px dashed var(--border);border-radius:12px;margin-top:4px}
+.preview-score .big{font-size:28px;font-weight:800;color:var(--lvl)}
+
+/* ---------- Toast ---------- */
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:calc(100vw - 32px)}
+.toast{background:#0f172a;color:#fff;padding:10px 16px;border-radius:12px;box-shadow:var(--shadow-lg);font-size:13.5px;font-weight:500;animation:pop .2s;display:flex;gap:8px;align-items:center}
+[data-theme="dark"] .toast{background:#e6eaf3;color:#0b1020}
+.toast.error{background:var(--danger);color:#fff}
+
+/* ---------- Backup ---------- */
+.backup-actions{display:flex;flex-wrap:wrap;gap:10px}
+.import-box{border:2px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-top:12px}
+.import-report{margin-top:14px;font-size:13px}
+.import-report ul{margin:6px 0;padding-left:18px;max-height:140px;overflow:auto;color:var(--muted)}
+
+.skeleton{height:72px;border-radius:12px;background:linear-gradient(90deg,var(--surface2),var(--surface),var(--surface2));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1100px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .g2,.g2e{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:272px;transform:translateX(-100%);transition:transform .22s;box-shadow:var(--shadow-lg)}
+  .sidebar.open{transform:none}
+  .menu-btn{display:inline-flex}
+  .topbar{padding:12px 14px}
+  .content{padding:16px 14px 110px}
+  .fab{display:flex}
+  .add-top{display:none}
+  .matrix{grid-template-columns:1fr}
+  .sync .sync-text{display:none}
+}
+@media (max-width:600px){
+  .row2,.row3{grid-template-columns:1fr}
+  .stat .v{font-size:24px}
+  .cal-cell{min-height:58px;padding:4px}
+  .cal-cell .chip{display:none}
+  .cal-cell .dots{display:flex!important}
+  .cal-dow{padding:6px 2px;font-size:10px}
+  .hbar-row{grid-template-columns:96px 1fr 32px}
+  .task-actions{flex-direction:column}
+  .toolbar .input{flex:1 1 140px}
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal{max-height:94vh;border-radius:18px 18px 0 0}
+}
+.dots{display:none;gap:3px;flex-wrap:wrap}
+/* ---------- M4: tugas dibagikan ---------- */
+.badge.from{background:var(--primary-soft);color:var(--primary)}
+.badge.to{background:color-mix(in srgb,var(--info) 13%,transparent);color:var(--info)}
+.task.is-recv{border-style:dashed;border-left-style:solid}
+.mini.is-recv{border-style:dashed}
+.mini.no-drag{cursor:default}
+.chip.recv{box-shadow:inset 0 0 0 1px currentColor}
+.prog{display:inline-flex;align-items:center;gap:6px}
+.prog .bar{width:60px;height:6px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--info)}
+.share-note{font-size:12.5px}
+/* ---------- M4.2: kolaborasi ---------- */
+.collab{border-top:1px solid var(--border);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:14px}
+.collab h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.collab-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.collab-row .grow{flex:1;min-width:0}
+.prog-edit{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.prog-edit input[type=range]{flex:1;min-width:160px;accent-color:var(--info)}
+.prog-edit b{min-width:44px;text-align:right}
+.act-list{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+.act-item{font-size:12.5px;padding:8px 10px;border-radius:10px;background:var(--surface2);word-break:break-word}
+.act-item.note{border-left:3px solid var(--primary)}
+.act-item.warn{border-left:3px solid var(--warn)}
+.act-item .who{font-weight:700}
+.act-item .when{color:var(--muted);font-size:11.5px;margin-left:6px}
+.act-item .txt{margin-top:3px;white-space:pre-wrap}
+.act-modal{z-index:70}
+.sent-bar{display:inline-block;width:70px;height:6px;border-radius:9px;background:var(--surface2);overflow:hidden;vertical-align:middle;margin-left:6px}
+.sent-bar i{display:block;height:100%;background:var(--info)}
+/* ---------- M4.2a: filter cakupan statistik ---------- */
+.scope-bar{display:inline-flex;gap:4px;background:var(--surface2);padding:4px;border-radius:11px;flex-wrap:wrap;max-width:100%}
+.scope-bar button{border:0;background:transparent;padding:7px 12px;border-radius:8px;font-weight:600;font-size:13px;color:var(--muted)}
+.scope-bar button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.scope-bar button .pill{margin-left:6px}
+.scope-info{font-size:12.5px;color:var(--muted);margin:8px 0 16px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--lvl)}
+.dots i.lvl-critical{--lvl:var(--crit)}.dots i.lvl-high{--lvl:var(--high)}.dots i.lvl-medium{--lvl:var(--med)}.dots i.lvl-low{--lvl:var(--low)}
+
+/* M4.2a soft luxury pastel theme: visual changes only */
+:root {
+ --bg:#F3EFEB;--surface:#FCFBF9;--surface2:#E8F0EF;--border:#D9E4E3;
+ --text:#244958;--muted:#607980;--primary:#477D87;--primary-2:#659CA6;
+ --primary-soft:#D9E9E9;--on-primary:#FFFFFF;
+ --danger:#BA5F6A;--warn:#A57C3F;--ok:#438678;--info:#4B8E9B;
+ --crit:#B96D76;--high:#BE8B66;--med:#B5A36E;--low:#64988A;
+ --q1:#C07883;--q2:#6B9FA8;--q3:#C3AC86;--q4:#879DA1;
+ --shadow:0 2px 12px rgba(36,73,88,.055);--shadow-lg:0 18px 44px rgba(27,57,68,.18);
+ --radius:17px;--radius-sm:11px;
+}
+[data-theme="dark"] {
+ --bg:#142A34;--surface:#203B47;--surface2:#2A4A55;--border:#41606A;
+ --text:#EFF5F2;--muted:#B7CFD1;--primary:#A5D0D2;--primary-2:#BCE0DD;
+ --primary-soft:#335865;--on-primary:#18343F;
+ --danger:#F3A2A7;--warn:#E0BC82;--ok:#A6D9BF;--info:#A5D0D2;
+ --crit:#E7A4AE;--high:#E0B08C;--med:#D8C594;--low:#9DCDB5;
+ --q1:#E7A4AE;--q2:#A5D0D2;--q3:#D8C594;--q4:#B7CFD1;
+ --shadow:0 2px 12px rgba(0,0,0,.13);--shadow-lg:0 18px 44px rgba(0,0,0,.3);
+}
+.sidebar{background:#244958;border-right-color:#244958;color:#F3EFEB}
+.sidebar .brand{color:#FFFDF8}
+.sidebar .brand-logo{background:linear-gradient(135deg,#72A6B0,#C3AC86);color:#203F4B}
+.sidebar .nav-label{color:#B8CDD0}
+.sidebar .nav-item{color:#D7E4E4}
+.sidebar .nav-item:hover{background:#355B69;color:#fff}
+.sidebar .nav-item.active{background:#D9E9E9;color:#244958}
+.sidebar .nav-item .count{background:#446B77;color:#EAF5F4}
+.sidebar .nav-item.active .count{background:#477D87;color:white}
+.sidebar .side-foot{border-top-color:#416775}
+.sidebar .user-chip .em{color:#FFFDF8}
+.sidebar .user-chip .small{color:#B8CDD0}
+.sidebar .avatar{background:#D9E9E9;color:#244958}
+.sidebar .icon-btn{color:#DBE8E7}
+.sidebar .icon-btn:hover{background:#355B69;color:#fff}
+.brand-logo{background:linear-gradient(135deg,#72A6B0,#C3AC86)}
+.hero{background:linear-gradient(125deg,#244958 0%,#427885 70%,#72A6B0 100%)}
+.progress{background:linear-gradient(90deg,#72A6B0,#C3AC86)}
+.card,.task,.quad,.kcol{box-shadow:var(--shadow)}
+.btn-primary{background:#477D87;border-color:#477D87;color:white}
+.btn-primary:hover{background:#356A74;border-color:#356A74}
+[data-theme="dark"] .sidebar{background:#10252F;border-right-color:#294956}
+[data-theme="dark"] .sidebar .nav-item.active{background:#A5D0D2;color:#18343F}
+[data-theme="dark"] .hero{background:linear-gradient(125deg,#183844,#2D6370)}
+[data-theme="dark"] .btn-primary{background:#A5D0D2;border-color:#A5D0D2;color:#18343F}
+[data-theme="dark"] .btn-primary:hover{background:#C0E1DE;border-color:#C0E1DE}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<!-- ================= SETUP SCREEN ================= -->
+<section id="setupScreen" class="center-screen hidden">
+  <div class="auth-card">
+    <div class="brand"><div class="brand-logo" data-icon="logo"></div>Productivity Hub</div>
+    <h2>Konfigurasi Supabase</h2>
+    <p class="sub">Masukkan Project URL dan Publishable key (atau anon key) dari Supabase. Ini hanya perlu dilakukan sekali per perangkat.</p>
+    <div id="setupMsg"></div>
+    <form id="setupForm" autocomplete="off">
+      <div class="field"><label class="lbl" for="cfgUrl">Project URL</label>
+        <input class="input" id="cfgUrl" placeholder="https://xxxxxxxx.supabase.co" required></div>
+      <div class="field"><label class="lbl" for="cfgKey">Publishable / anon key</label>
+        <input class="input" id="cfgKey" placeholder="sb_publishable_... atau eyJhbGciOi..." required></div>
+      <button class="btn btn-primary btn-block" type="submit">Simpan &amp; Lanjutkan</button>
+    </form>
+    <p class="auth-foot">Jangan pernah memasukkan <b>service_role</b> atau <b>secret key</b>.</p>
+  </div>
+</section>
+
+<!-- ================= AUTH SCREEN ================= -->
+<section id="authScreen" class="center-screen hidden">
+  <div class="auth-card">
+    <div class="brand"><div class="brand-logo" data-icon="logo"></div>Productivity Hub</div>
+    <div id="authTabs" class="tabs">
+      <button type="button" data-auth-tab="login" class="active">Masuk</button>
+      <button type="button" data-auth-tab="register">Daftar</button>
+    </div>
+    <div id="authMsg"></div>
+
+    <form id="loginForm" data-auth-form="login">
+      <div class="field"><label class="lbl" for="liEmail">Email</label><input class="input" type="email" id="liEmail" autocomplete="email" required></div>
+      <div class="field"><label class="lbl" for="liPass">Kata sandi</label><input class="input" type="password" id="liPass" autocomplete="current-password" required></div>
+      <button class="btn btn-primary btn-block" type="submit">Masuk</button>
+      <div class="auth-foot"><button type="button" class="link-btn" data-auth-tab="forgot">Lupa kata sandi?</button></div>
+    </form>
+
+    <form id="registerForm" data-auth-form="register" class="hidden">
+      <div class="field"><label class="lbl" for="reEmail">Email</label><input class="input" type="email" id="reEmail" autocomplete="email" required></div>
+      <div class="field"><label class="lbl" for="rePass">Kata sandi (min. 8 karakter)</label><input class="input" type="password" id="rePass" minlength="8" autocomplete="new-password" required></div>
+      <div class="field"><label class="lbl" for="rePass2">Ulangi kata sandi</label><input class="input" type="password" id="rePass2" minlength="8" autocomplete="new-password" required></div>
+      <button class="btn btn-primary btn-block" type="submit">Buat Akun</button>
+      <div class="auth-foot">Belum menerima email verifikasi? <button type="button" class="link-btn" id="resendBtn">Kirim ulang</button></div>
+    </form>
+
+    <form id="forgotForm" data-auth-form="forgot" class="hidden">
+      <h2 style="margin-top:6px">Reset kata sandi</h2>
+      <p class="sub">Kami akan mengirim tautan reset ke email Anda.</p>
+      <div class="field"><label class="lbl" for="fgEmail">Email</label><input class="input" type="email" id="fgEmail" autocomplete="email" required></div>
+      <button class="btn btn-primary btn-block" type="submit">Kirim Tautan Reset</button>
+      <div class="auth-foot"><button type="button" class="link-btn" data-auth-tab="login">← Kembali ke Masuk</button></div>
+    </form>
+
+    <form id="recoveryForm" data-auth-form="recovery" class="hidden">
+      <h2 style="margin-top:6px">Buat kata sandi baru</h2>
+      <p class="sub">Masukkan kata sandi baru untuk akun Anda.</p>
+      <div class="field"><label class="lbl" for="rcPass">Kata sandi baru (min. 8 karakter)</label><input class="input" type="password" id="rcPass" minlength="8" autocomplete="new-password" required></div>
+      <div class="field"><label class="lbl" for="rcPass2">Ulangi kata sandi baru</label><input class="input" type="password" id="rcPass2" minlength="8" autocomplete="new-password" required></div>
+      <button class="btn btn-primary btn-block" type="submit">Simpan Kata Sandi</button>
+    </form>
+    <div class="auth-foot" id="cfgResetWrap"><button type="button" class="link-btn small" data-action="reset-config">Ubah konfigurasi Supabase</button></div>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<div id="appScreen" class="app hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-logo" data-icon="logo"></div>Productivity Hub</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="user-chip"><div class="avatar" id="userAvatar">?</div><div style="min-width:0;flex:1"><div class="em" id="userEmail"></div><div class="small muted">Masuk</div></div>
+        <button class="icon-btn" data-action="logout" title="Keluar" aria-label="Keluar" data-icon="logout"></button></div>
+    </div>
+  </aside>
+  <div class="overlay hidden" id="overlay"></div>
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" data-action="menu" aria-label="Menu" data-icon="menu"></button>
+      <h1 id="viewTitle">Dashboard</h1>
+      <div class="sync" id="syncBox" title="Status sinkronisasi"><span class="dot" id="syncDot"></span><span class="sync-text" id="syncText">—</span></div>
+      <button class="icon-btn" data-action="refresh" title="Muat ulang data dari cloud" aria-label="Muat ulang" data-icon="refresh"></button>
+      <button class="icon-btn" data-action="theme" title="Mode terang/gelap" aria-label="Ganti tema" id="themeBtn"></button>
+      <button class="btn btn-primary add-top" data-action="new"><span data-icon="plus"></span>Tugas Baru</button>
+    </header>
+    <div class="content" id="view"></div>
+  </main>
+  <button class="fab" data-action="new" aria-label="Tugas baru" data-icon="plus24"></button>
+</div>
+
+<!-- ================= TASK MODAL ================= -->
+<div id="taskModal" class="modal-bg hidden" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+  <form class="modal" id="taskForm" novalidate>
+    <div class="modal-h"><h3 id="taskModalTitle">Tugas Baru</h3><button type="button" class="icon-btn" data-action="close-modal" aria-label="Tutup" data-icon="x"></button></div>
+    <div class="modal-b">
+      <div id="taskFormMsg"></div>
+      <div class="field"><label class="lbl" for="fTitle">Judul tugas *</label><input class="input" id="fTitle" maxlength="200" required placeholder="mis. Rekonsiliasi bank bulan November"></div>
+      <div class="field"><label class="lbl" for="fDesc">Deskripsi</label><textarea class="input" id="fDesc" maxlength="5000" placeholder="Detail, catatan, atau langkah kerja (opsional)"></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="lbl" for="fCat">Kategori</label><input class="input" id="fCat" list="catList" maxlength="60" placeholder="Pilih atau ketik"><datalist id="catList"></datalist></div>
+        <div class="field"><label class="lbl" for="fStatus">Status</label><select class="input" id="fStatus"><option value="todo">Belum Mulai</option><option value="in_progress">Sedang Dikerjakan</option><option value="done">Selesai</option></select></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label class="lbl" for="fDue">Tenggat</label><input class="input" type="date" id="fDue"></div>
+        <div class="field"><label class="lbl" for="fEst">Estimasi (menit)</label><input class="input" type="number" id="fEst" min="0" max="100000" step="5" placeholder="mis. 60"></div>
+        <div class="field"><label class="lbl" for="fRec">Pengulangan</label><select class="input" id="fRec"><option value="none">Sekali saja</option><option value="daily">Harian</option><option value="weekly">Mingguan</option><option value="monthly">Bulanan</option></select></div>
+      </div>
+      <div class="row3">
+        <div class="field range-wrap"><div class="rl"><span>Kepentingan</span><b id="vImp">3</b></div><input type="range" id="fImp" min="1" max="5" value="3"><div class="hint">1 rendah · 5 sangat penting</div></div>
+        <div class="field range-wrap"><div class="rl"><span>Urgensi</span><b id="vUrg">3</b></div><input type="range" id="fUrg" min="1" max="5" value="3"><div class="hint">1 bisa nanti · 5 mendesak</div></div>
+        <div class="field range-wrap"><div class="rl"><span>Dampak bisnis</span><b id="vImpact">3</b></div><input type="range" id="fImpact" min="1" max="5" value="3"><div class="hint">1 kecil · 5 sangat besar</div></div>
+      </div>
+      <div id="scorePreview"></div>
+      <div id="collabBox"></div>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn btn-ghost" data-action="delete-from-modal" id="modalDelete" style="margin-right:auto;color:var(--danger)"><span data-icon="trash"></span>Hapus</button>
+      <button type="button" class="btn" data-action="close-modal">Batal</button>
+      <button type="submit" class="btn btn-primary" id="taskSaveBtn">Simpan</button>
+    </div>
+  </form>
+</div>
+
+<!-- ================= CONFIRM MODAL ================= -->
+<div id="confirmModal" class="modal-bg hidden" role="alertdialog" aria-modal="true">
+  <div class="modal sm">
+    <div class="modal-h"><h3 id="cfTitle">Konfirmasi</h3></div>
+    <div class="modal-b"><p id="cfText" style="margin:0;word-break:break-word"></p></div>
+    <div class="modal-f"><button class="btn" id="cfNo">Batal</button><button class="btn btn-danger" id="cfYes">Ya, lanjutkan</button></div>
+  </div>
+</div>
+
+<!-- ================= M4.2: DIALOG AKSI BERBAGI ================= -->
+<div id="actModal" class="modal-bg act-modal hidden" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+  <form class="modal sm" id="actForm" novalidate>
+    <div class="modal-h"><h3 id="actTitle">Aksi</h3><button type="button" class="icon-btn" data-action="act-cancel" aria-label="Tutup" data-icon="x"></button></div>
+    <div class="modal-b">
+      <div id="actMsg"></div>
+      <p id="actText" style="margin-top:0;word-break:break-word"></p>
+      <div class="field" id="actEmailWrap"><label class="lbl" for="actEmail">Email pengguna terdaftar</label>
+        <input class="input" type="email" id="actEmail" autocomplete="off" maxlength="254" placeholder="nama@perusahaan.com"></div>
+      <div class="field" id="actNoteWrap"><label class="lbl" for="actNote" id="actNoteLbl">Catatan (opsional)</label>
+        <textarea class="input" id="actNote" maxlength="2000"></textarea></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn" data-action="act-cancel">Batal</button><button type="submit" class="btn btn-primary" id="actOk">OK</button></div>
+  </form>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   PERSONAL PRODUCTIVITY HUB
+   ---------------------------------------------------------------------
+   KONFIGURASI (opsional):
+   Anda boleh mengisi URL & publishable key di sini. Jika dikosongkan,
+   aplikasi akan menampilkan layar konfigurasi saat pertama dibuka dan
+   menyimpannya di browser (localStorage) perangkat tersebut.
+   JANGAN PERNAH mengisi service_role key / secret key di sini.
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://svhdlvkadrlxcwnvhpgz.supabase.co',
+  SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_JULULIvHlloyv_COild51A_b4wTFrSh'  // publishable key: aman untuk browser, data dilindungi RLS
+};
+
+/* Nilai yang disimpan ke kolom status & recurrence.
+   Ubah hanya jika tabel Anda memakai nilai berbeda. */
+const ST = { TODO: 'todo', DOING: 'in_progress', DONE: 'done' };
+const RECUR = { NONE: 'none', DAILY: 'daily', WEEKLY: 'weekly', MONTHLY: 'monthly' };
+/* Ambang Eisenhower: nilai >= ambang dianggap "Penting"/"Mendesak" */
+const MATRIX_THRESHOLD = 4;
+
+const STATUS_LABEL = { todo: 'Belum Mulai', in_progress: 'Dikerjakan', done: 'Selesai' };
+const REC_LABEL = { none: 'Sekali', daily: 'Harian', weekly: 'Mingguan', monthly: 'Bulanan' };
+const CATEGORIES = ['Finance','Accounting','HR & Payroll','Operations','Administration','Meetings','Strategic Planning','Personal'];
+const LEVELS = [
+  { key:'critical', label:'Kritis', min:80, color:'var(--crit)' },
+  { key:'high',     label:'Tinggi', min:60, color:'var(--high)' },
+  { key:'medium',   label:'Sedang', min:40, color:'var(--med)' },
+  { key:'low',      label:'Rendah', min:0,  color:'var(--low)' }
+];
+const QUADS = {
+  1:{ title:'Q1 · Kerjakan Sekarang', sub:'Penting & Mendesak', color:'var(--q1)' },
+  2:{ title:'Q2 · Jadwalkan', sub:'Penting & Tidak Mendesak', color:'var(--q2)' },
+  3:{ title:'Q3 · Delegasikan', sub:'Tidak Penting & Mendesak', color:'var(--q3)' },
+  4:{ title:'Q4 · Eliminasi / Tunda', sub:'Tidak Penting & Tidak Mendesak', color:'var(--q4)' }
+};
+const VIEWS = [
+  ['dashboard','Dashboard','dashboard'],
+  ['today','Hari Ini','sun'],
+  ['upcoming','Mendatang','upcoming'],
+  ['all','Semua Tugas','list'],
+  ['matrix','Matriks Eisenhower','matrix'],
+  ['kanban','Kanban','kanban'],
+  ['calendar','Kalender','calendar'],
+  ['completed','Selesai','completed'],
+  ['analytics','Analitik','analytics'],
+  ['mine','Tugas Saya','user'],
+  ['received','Ditugaskan ke Saya','inbox'],
+  ['sent','Saya Tugaskan','send'],
+  ['backup','Cadangan & Pengaturan','backup']
+];
+/* Label kelompok menu (berdasarkan kunci tampilan, bukan urutan) */
+const NAV_GROUPS = { dashboard: 'Menu', mine: 'Berbagi Tugas', backup: 'Lainnya' };
+
+/* ------------------------- Icons ------------------------- */
+const ICONS = {
+  logo:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  upcoming:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  matrix:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+  kanban:'<rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  completed:'<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="M22 4L12 14l-3-3"/>',
+  analytics:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+  backup:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  chevL:'<path d="M15 18l-6-6 6-6"/>',
+  chevR:'<path d="M9 18l6-6-6-6"/>',
+  alert:'<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.3.3 1.4 1.4 2.8 2.5 2.8z"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
+  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  repeat:'<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'
+};
+function svg(name, size = 18) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+}
+
+/* ------------------------- State ------------------------- */
+let sb = null, user = null, tasks = [], view = 'dashboard';
+/* M4: tasks    = HANYA tugas milik sendiri (pribadi + yang saya bagikan) — dipakai Dashboard,
+                  Analitik, ekspor/impor, hapus massal, seperti sebelumnya.
+       received = tugas yang dibagikan orang lain KEPADA saya (hanya-baca, status lewat RPC).
+       assignees = { task_id: user_id penerima }, names = { user_id: nama tampilan } */
+let received = [], assignees = {}, names = {}, profileEnsured = false, warnedForeign = false;
+let loadedOnce = false, lastSync = null, loadingNow = false, recoveryMode = false, appUid = null;
+let editingId = null, pendingImport = null;
+const now0 = new Date();
+const ui = { search:'', cat:'', status:'active', level:'', overdue:false, sort:'priority', src:'all', scope:'all',
+  csearch:'', calY: now0.getFullYear(), calM: now0.getMonth(), calSel: null };
+
+/* ------------------------- Helpers ------------------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const fmtD = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayStr = () => fmtD(new Date());
+const dOnly = s => s ? String(s).slice(0, 10) : null;
+function parseD(s) {
+  s = dOnly(s); if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const [y, m, d] = s.split('-').map(Number); const dt = new Date(y, m - 1, d);
+  return (dt.getMonth() === m - 1) ? dt : null;
+}
+function daysUntil(s) { const d = parseD(s); if (!d) return null; return Math.round((d - parseD(todayStr())) / 864e5); }
+function addDays(s, n) { const d = parseD(s); d.setDate(d.getDate() + n); return fmtD(d); }
+function addMonths(s, n) {
+  const d = parseD(s); const day = d.getDate();
+  const r = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const last = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+  r.setDate(Math.min(day, last)); return fmtD(r);
+}
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const fmtDate = (s, opt = { day:'numeric', month:'short', year:'numeric' }) => { const d = parseD(s); return d ? new Intl.DateTimeFormat('id-ID', opt).format(d) : '-'; };
+const fmtDateTime = iso => { if (!iso) return '-'; const d = new Date(iso); return isNaN(d) ? '-' : new Intl.DateTimeFormat('id-ID', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }).format(d); };
+const localDateOfISO = iso => { if (!iso) return null; const d = new Date(iso); return isNaN(d) ? null : fmtD(d); };
+function fmtMin(m) { m = Number(m) || 0; if (m < 60) return `${m} mnt`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} j ${r} m` : `${h} jam`; }
+const st = t => [ST.TODO, ST.DOING, ST.DONE].includes(t.status) ? t.status : ST.TODO;
+const isDone = t => st(t) === ST.DONE;
+const isActive = t => !isDone(t);
+const recOf = t => [RECUR.DAILY, RECUR.WEEKLY, RECUR.MONTHLY].includes(t.recurrence) ? t.recurrence : RECUR.NONE;
+const isRecurring = t => recOf(t) !== RECUR.NONE;
+const isOverdue = t => isActive(t) && t.due_date && daysUntil(t.due_date) < 0;
+const byId = id => tasks.find(t => String(t.id) === String(id)) || received.find(t => String(t.id) === String(id));
+/* ---- M4: sharing ---- */
+const isRecv = t => !!t && t._recv === true;                       // tugas yang diterima dari orang lain
+const isShared = t => !!t && t.visibility === 'shared';            // tugas Dibagikan (milik saya atau diterima)
+const isArchived = t => !!t && !!t.archived_at;
+const nameOf = uid => (uid && names[uid]) || (uid && user && uid === user.id ? 'Saya' : 'Pengguna lain');
+const senderName = t => nameOf(t.user_id);
+const recipientId = t => assignees[String(t.id)] || null;
+const recipientName = t => recipientId(t) ? nameOf(recipientId(t)) : '—';
+const progOf = t => clamp(Number(t.progress_percent) || 0, 0, 100);
+/* Tugas untuk tampilan gabungan (Semua Tugas, Kalender, Kanban, Matriks) */
+const viewTasks = () => tasks.concat(received);
+/* ---- M4.2a: SATU sumber data untuk seluruh Dashboard & Analitik ----
+   all      = milik sendiri + diterima (viewTasks)   ← bawaan
+   own      = milik sendiri (termasuk yang saya bagikan ke orang lain — saya pemiliknya)
+   received = yang dibagikan kepada saya (tanggung jawab kerja saya)
+   Semua data berasal dari loadTasks() (RLS M3.1); tugas yang dicabut/dialihkan sudah tidak ada
+   di `received` setelah sinkronisasi. Duplikat (ID sama) dibuang agar tidak terhitung dua kali. */
+const SCOPES = { all: 'Semua Tugas', own: 'Tugas Saya', received: 'Ditugaskan ke Saya' };
+function statTasks(scope = ui.scope) {
+  const src = scope === 'own' ? tasks : scope === 'received' ? received : viewTasks();
+  const seen = new Set();
+  return src.filter(t => { const k = String(t.id); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+function scopeBar() {
+  const n = k => statTasks(k).length;
+  const info = ui.scope === 'all' ? `Menghitung ${n('all')} tugas: ${n('own')} milik Anda + ${n('received')} yang ditugaskan kepada Anda.`
+    : ui.scope === 'own' ? `Menghitung ${n('own')} tugas milik Anda (termasuk yang Anda bagikan ke orang lain).`
+    : `Menghitung ${n('received')} tugas yang ditugaskan kepada Anda oleh pengguna lain.`;
+  return `<div class="scope-bar" role="group" aria-label="Cakupan statistik">${Object.entries(SCOPES).map(([k, l]) =>
+    `<button type="button" class="${ui.scope === k ? 'active' : ''}" data-action="scope" data-value="${k}" aria-pressed="${ui.scope === k}">${l}<span class="pill">${n(k)}</span></button>`).join('')}</div>
+    <p class="scope-info">${esc(info)}</p>`;
+}
+const scopeEmpty = () => ui.scope === 'received' ? 'Belum ada tugas yang ditugaskan kepada Anda.' : ui.scope === 'own' ? 'Belum ada tugas milik Anda.' : 'Belum ada tugas.';
+const lvl15 = v => clamp(Math.round(Number(v) || 3), 1, 5);
+function weekRange() { const t = parseD(todayStr()); const dow = (t.getDay() + 6) % 7; const s = new Date(t); s.setDate(t.getDate() - dow); const e = new Date(s); e.setDate(s.getDate() + 6); return [fmtD(s), fmtD(e)]; }
+function dueLabel(t) {
+  if (!t.due_date) return '';
+  const k = daysUntil(t.due_date);
+  if (k === null) return '';
+  if (isDone(t)) return fmtDate(t.due_date);
+  if (k < 0) return `Terlambat ${-k} hari`;
+  if (k === 0) return 'Hari ini';
+  if (k === 1) return 'Besok';
+  if (k < 7) return `${k} hari lagi`;
+  return fmtDate(t.due_date);
+}
+
+/* ------------------------- Priority scoring ------------------------- */
+function deadlineFactor(due) {
+  if (!due) return { v: 0, note: 'Tanpa tenggat' };
+  const k = daysUntil(due);
+  if (k === null) return { v: 0, note: 'Tanggal tidak valid' };
+  if (k < 0) return { v: 1, note: `Terlambat ${-k} hari` };
+  if (k === 0) return { v: 1, note: 'Jatuh tempo hari ini' };
+  if (k >= 14) return { v: 0, note: `${k} hari lagi (≥14 hari)` };
+  return { v: 1 - k / 14, note: `${k} hari lagi` };
+}
+function levelOf(score) { return LEVELS.find(l => score >= l.min); }
+function scoreOf(t) {
+  const n = v => (lvl15(v) - 1) / 4;
+  const dl = deadlineFactor(t.due_date);
+  const parts = [
+    { label:'Urgensi', raw:`${lvl15(t.urgency)}/5`, norm:n(t.urgency), w:30 },
+    { label:'Kepentingan', raw:`${lvl15(t.importance)}/5`, norm:n(t.importance), w:30 },
+    { label:'Dampak bisnis', raw:`${lvl15(t.impact)}/5`, norm:n(t.impact), w:20 },
+    { label:'Kedekatan tenggat', raw:dl.note, norm:dl.v, w:20 }
+  ];
+  parts.forEach(p => p.pts = p.norm * p.w);
+  const score = Math.round(parts.reduce((a, p) => a + p.pts, 0));
+  return { score, level: levelOf(score), parts };
+}
+function explainHTML(s) {
+  const top = [...s.parts].sort((a, b) => b.pts - a.pts).filter(p => p.pts > 0).slice(0, 2).map(p => p.label.toLowerCase());
+  return `<div class="explain"><table>${s.parts.map(p => `<tr><td>${p.label} <span class="muted">(${esc(p.raw)} · bobot ${p.w}%)</span><div class="bar"><i style="width:${Math.round(p.norm*100)}%"></i></div></td><td>+${p.pts.toFixed(1)}</td></tr>`).join('')}
+  <tr class="total"><td>Skor prioritas (${s.level.label})</td><td>${s.score}/100</td></tr></table>
+  <div class="muted" style="margin-top:6px">Setiap faktor dinormalisasi ke 0–1 (nilai 1→0, 5→1; tenggat: hari ini/terlambat = 1, ≥14 hari = 0), lalu dikalikan bobotnya. ${top.length ? 'Faktor terbesar: ' + top.join(' & ') + '.' : ''}</div></div>`;
+}
+function cmpPriority(a, b) {
+  const sa = scoreOf(a).score, sb2 = scoreOf(b).score;
+  if (sb2 !== sa) return sb2 - sa;
+  const da = a.due_date ? dOnly(a.due_date) : '9999', db = b.due_date ? dOnly(b.due_date) : '9999';
+  if (da !== db) return da < db ? -1 : 1;
+  return (Number(a.estimated_minutes) || 9999) - (Number(b.estimated_minutes) || 9999);
+}
+function recommended(n = 5, list = tasks) { return list.filter(isActive).sort(cmpPriority).slice(0, n); }
+function reasonText(t) {
+  const s = scoreOf(t); const bits = [];
+  if (isOverdue(t)) bits.push('sudah melewati tenggat');
+  else if (t.due_date && daysUntil(t.due_date) === 0) bits.push('jatuh tempo hari ini');
+  else if (t.due_date && daysUntil(t.due_date) <= 3) bits.push(`tenggat ${dueLabel(t).toLowerCase()}`);
+  if (lvl15(t.urgency) >= 4) bits.push('urgensi tinggi');
+  if (lvl15(t.importance) >= 4) bits.push('sangat penting');
+  if (lvl15(t.impact) >= 4) bits.push('dampak bisnis besar');
+  return `Skor ${s.score} (${s.level.label})` + (bits.length ? ' — ' + bits.join(', ') + '.' : '.');
+}
+function quadOf(t) {
+  const imp = lvl15(t.importance) >= MATRIX_THRESHOLD, urg = lvl15(t.urgency) >= MATRIX_THRESHOLD;
+  return imp && urg ? 1 : imp ? 2 : urg ? 3 : 4;
+}
+
+/* ------------------------- UI utilities ------------------------- */
+function toast(msg, type = 'ok', ms = 3200) {
+  const el = document.createElement('div'); el.className = 'toast ' + (type === 'error' ? 'error' : '');
+  el.textContent = msg; $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), type === 'error' ? 6000 : ms);
+}
+let busyCount = 0;
+function busy(on) { busyCount += on ? 1 : -1; if (busyCount < 0) busyCount = 0; $('#progress').classList.toggle('on', busyCount > 0); }
+function setSync(state) {
+  const dot = $('#syncDot'), txt = $('#syncText');
+  dot.className = 'dot ' + (state === 'ok' ? 'ok' : state === 'error' ? 'err' : state === 'loading' ? 'load' : '');
+  if (state === 'loading') txt.textContent = 'Menyinkronkan…';
+  else if (state === 'error') txt.textContent = 'Gagal sinkron — coba muat ulang';
+  else if (lastSync) txt.textContent = 'Tersinkron ' + lastSync.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  $('#syncBox').title = lastSync ? 'Terakhir disinkronkan: ' + lastSync.toLocaleString('id-ID') : 'Belum disinkronkan';
+}
+function confirmDialog(text, { title = 'Konfirmasi', yes = 'Ya, lanjutkan', danger = true } = {}) {
+  return new Promise(resolve => {
+    $('#cfTitle').textContent = title; $('#cfText').textContent = text;
+    const y = $('#cfYes'), n = $('#cfNo'); y.textContent = yes; y.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+    $('#confirmModal').classList.remove('hidden'); y.focus();
+    const done = v => { $('#confirmModal').classList.add('hidden'); y.onclick = n.onclick = null; resolve(v); };
+    y.onclick = () => done(true); n.onclick = () => done(false);
+  });
+}
+function show(screen) {
+  $('#setupScreen').classList.toggle('hidden', screen !== 'setup');
+  $('#authScreen').classList.toggle('hidden', screen !== 'auth');
+  $('#appScreen').classList.toggle('hidden', screen !== 'app');
+}
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('pph_theme', t); } catch {}
+  const b = $('#themeBtn'); if (b) b.innerHTML = svg(t === 'dark' ? 'sun' : 'moon');
+  document.querySelector('meta[name=theme-color]').content = t === 'dark' ? '#152B34' : '#244958';
+}
+function fillIcons(root = document) {
+  root.querySelectorAll('[data-icon]').forEach(el => {
+    const n = el.dataset.icon;
+    if (n === 'plus24') el.innerHTML = svg('plus', 26);
+    else if (el.classList.contains('brand-logo')) el.innerHTML = svg('logo', 18);
+    else el.innerHTML = svg(n, 17);
+    el.removeAttribute('data-icon');
+  });
+}
+function allCategories() {
+  const set = new Set(CATEGORIES);
+  tasks.forEach(t => { if (t.category && String(t.category).trim()) set.add(String(t.category).trim()); });
+  return [...set];
+}
+
+/* ------------------------- Config & Supabase ------------------------- */
+function getConfig() {
+  if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_PUBLISHABLE_KEY) return { url: CONFIG.SUPABASE_URL.trim(), key: CONFIG.SUPABASE_PUBLISHABLE_KEY.trim(), src: 'code' };
+  try { const c = JSON.parse(localStorage.getItem('pph_config') || 'null'); if (c && c.url && c.key) return { ...c, src: 'local' }; } catch {}
+  return null;
+}
+function keyProblem(k) {
+  if (/^sb_secret_/i.test(k)) return 'Ini adalah SECRET key. Gunakan Publishable key (diawali sb_publishable_) atau anon key.';
+  const parts = k.split('.');
+  if (parts.length === 3) {
+    try {
+      const b = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const p = JSON.parse(atob(b + '==='.slice((b.length + 3) % 4)));
+      if (p.role === 'service_role') return 'Ini adalah service_role key yang sangat rahasia! Jangan dipakai di browser. Gunakan anon / publishable key.';
+    } catch {}
+  } else if (!/^sb_publishable_/i.test(k)) return 'Format key tidak dikenali. Gunakan Publishable key (sb_publishable_...) atau anon key (eyJ...).';
+  return null;
+}
+function appUrl() { return location.origin + location.pathname; }
+
+async function startSupabase(cfg) {
+  if (!window.supabase || !window.supabase.createClient) {
+    show('setup');
+    $('#setupMsg').innerHTML = '<div class="msg error">Library Supabase gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.</div>';
+    return;
+  }
+  const hash = location.hash || '';
+  const hp = new URLSearchParams(hash.replace(/^#/, ''));
+  const qp = new URLSearchParams(location.search);
+  const urlType = hp.get('type') || qp.get('type');
+  const urlErr = hp.get('error_description') || qp.get('error_description');
+  if (urlType === 'recovery') recoveryMode = true;
+
+  try {
+    sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  } catch (e) {
+    show('setup'); $('#setupMsg').innerHTML = `<div class="msg error">Konfigurasi tidak valid: ${esc(e.message)}</div>`; return;
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    setTimeout(() => handleAuthEvent(event, session), 0);
+  });
+
+  const { data, error } = await sb.auth.getSession();
+  if (hash.includes('access_token') || hash.includes('error') || qp.has('code')) history.replaceState(null, '', location.pathname);
+  if (urlErr) { show('auth'); authTab('login'); authMsg(translateAuthError(urlErr), 'error'); return; }
+  if (error) { show('auth'); authTab('login'); authMsg(translateAuthError(error.message), 'error'); return; }
+  const session = data?.session;
+  if (recoveryMode) { user = session?.user || null; show('auth'); authTab('recovery'); return; }
+  if (session?.user) {
+    user = session.user; enterApp();
+    if (urlType === 'signup' || urlType === 'email') toast('Email berhasil diverifikasi. Selamat datang!');
+  } else { show('auth'); authTab('login'); }
+}
+function handleAuthEvent(event, session) {
+  if (event === 'PASSWORD_RECOVERY') { recoveryMode = true; user = session?.user || null; show('auth'); authTab('recovery'); return; }
+  if (event === 'SIGNED_OUT') { user = null; appUid = null; tasks = []; received = []; assignees = {}; names = {}; profileEnsured = false; warnedForeign = false; loadedOnce = false; show('auth'); authTab('login'); return; }
+  if (session?.user && !recoveryMode) { user = session.user; if (appUid !== user.id) enterApp(); }
+}
+function enterApp() {
+  if (!user) return;
+  if (appUid === user.id && !$('#appScreen').classList.contains('hidden')) return;
+  appUid = user.id;
+  show('app');
+  const em = user.email || '';
+  $('#userEmail').textContent = em; $('#userAvatar').textContent = (em[0] || '?').toUpperCase();
+  render(); loadTasks();
+}
+
+/* ------------------------- Auth UI ------------------------- */
+function authTab(tab) {
+  document.querySelectorAll('[data-auth-form]').forEach(f => f.classList.toggle('hidden', f.dataset.authForm !== tab));
+  document.querySelectorAll('#authTabs [data-auth-tab]').forEach(b => b.classList.toggle('active', b.dataset.authTab === tab));
+  $('#authTabs').classList.toggle('hidden', tab === 'forgot' || tab === 'recovery');
+  $('#cfgResetWrap').classList.toggle('hidden', getConfig()?.src !== 'local' || tab === 'recovery');
+  authMsg('');
+}
+function authMsg(text, type = 'info') { $('#authMsg').innerHTML = text ? `<div class="msg ${type}">${esc(text)}</div>` : ''; }
+function translateAuthError(m = '') {
+  const s = String(m).toLowerCase();
+  if (s.includes('invalid login credentials')) return 'Email atau kata sandi salah.';
+  if (s.includes('email not confirmed')) return 'Email belum diverifikasi. Buka email Anda dan klik tautan verifikasi.';
+  if (s.includes('already registered') || s.includes('already been registered')) return 'Email ini sudah terdaftar. Silakan masuk atau reset kata sandi.';
+  if (s.includes('password should be') || s.includes('weak password')) return 'Kata sandi terlalu lemah atau terlalu pendek.';
+  if (s.includes('rate limit') || s.includes('too many') || s.includes('security purposes')) return 'Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi.';
+  if (s.includes('expired') || s.includes('invalid') && s.includes('link')) return 'Tautan sudah kedaluwarsa atau tidak valid. Silakan minta tautan baru.';
+  if (s.includes('failed to fetch') || s.includes('network')) return 'Tidak dapat terhubung ke server. Periksa koneksi internet atau konfigurasi Supabase.';
+  if (s.includes('invalid api key') || s.includes('no api key')) return 'API key Supabase tidak valid. Periksa konfigurasi.';
+  if (s.includes('signups not allowed') || s.includes('signup is disabled')) return 'Pendaftaran akun baru dinonaktifkan di pengaturan Supabase.';
+  if (s.includes('same password') || s.includes('different from the old')) return 'Kata sandi baru harus berbeda dari kata sandi lama.';
+  return m || 'Terjadi kesalahan. Silakan coba lagi.';
+}
+async function withBtn(form, fn) {
+  const btn = form.querySelector('button[type=submit]'); const old = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Memproses…';
+  try { await fn(); } catch (e) { authMsg(translateAuthError(e.message), 'error'); }
+  finally { btn.disabled = false; btn.textContent = old; }
+}
+function bindAuth() {
+  document.querySelectorAll('[data-auth-tab]').forEach(b => b.addEventListener('click', () => authTab(b.dataset.authTab)));
+  $('#loginForm').addEventListener('submit', e => { e.preventDefault(); withBtn(e.target, async () => {
+    const { error } = await sb.auth.signInWithPassword({ email: $('#liEmail').value.trim(), password: $('#liPass').value });
+    if (error) throw error;
+    $('#liPass').value = '';
+  }); });
+  $('#registerForm').addEventListener('submit', e => { e.preventDefault(); withBtn(e.target, async () => {
+    const email = $('#reEmail').value.trim(), p1 = $('#rePass').value, p2 = $('#rePass2').value;
+    if (p1.length < 8) return authMsg('Kata sandi minimal 8 karakter.', 'error');
+    if (p1 !== p2) return authMsg('Konfirmasi kata sandi tidak sama.', 'error');
+    const { data, error } = await sb.auth.signUp({ email, password: p1, options: { emailRedirectTo: appUrl() } });
+    if (error) throw error;
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0)
+      return authMsg('Email ini sudah terdaftar. Silakan masuk atau gunakan "Lupa kata sandi".', 'error');
+    $('#rePass').value = $('#rePass2').value = '';
+    if (data.session) { toast('Akun berhasil dibuat.'); return; }
+    authMsg(`Pendaftaran berhasil! Kami mengirim email verifikasi ke ${email}. Klik tautan di email tersebut, lalu Anda akan otomatis masuk.`, 'ok');
+  }); });
+  $('#resendBtn').addEventListener('click', async () => {
+    const email = $('#reEmail').value.trim();
+    if (!email) return authMsg('Isi email Anda terlebih dahulu.', 'error');
+    const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: appUrl() } });
+    authMsg(error ? translateAuthError(error.message) : 'Email verifikasi telah dikirim ulang.', error ? 'error' : 'ok');
+  });
+  $('#forgotForm').addEventListener('submit', e => { e.preventDefault(); withBtn(e.target, async () => {
+    const email = $('#fgEmail').value.trim();
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: appUrl() });
+    if (error) throw error;
+    authMsg('Jika email terdaftar, tautan reset kata sandi telah dikirim. Periksa kotak masuk (dan folder spam).', 'ok');
+  }); });
+  $('#recoveryForm').addEventListener('submit', e => { e.preventDefault(); withBtn(e.target, async () => {
+    const p1 = $('#rcPass').value, p2 = $('#rcPass2').value;
+    if (p1.length < 8) return authMsg('Kata sandi minimal 8 karakter.', 'error');
+    if (p1 !== p2) return authMsg('Konfirmasi kata sandi tidak sama.', 'error');
+    const { data: s } = await sb.auth.getSession();
+    if (!s?.session) return authMsg('Sesi reset sudah tidak berlaku. Silakan minta tautan reset baru.', 'error');
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if (error) throw error;
+    recoveryMode = false; $('#rcPass').value = $('#rcPass2').value = '';
+    toast('Kata sandi berhasil diperbarui.');
+    user = s.session.user; enterApp();
+  }); });
+  $('#setupForm').addEventListener('submit', e => {
+    e.preventDefault();
+    let url = $('#cfgUrl').value.trim().replace(/\/+$/, ''); const key = $('#cfgKey').value.trim();
+    if (!/^https:\/\/[^\s/]+$/.test(url)) { $('#setupMsg').innerHTML = '<div class="msg error">URL harus berbentuk https://xxxx.supabase.co (tanpa path tambahan).</div>'; return; }
+    const prob = keyProblem(key);
+    if (prob) { $('#setupMsg').innerHTML = `<div class="msg error">${esc(prob)}</div>`; return; }
+    try { localStorage.setItem('pph_config', JSON.stringify({ url, key })); } catch {}
+    $('#setupMsg').innerHTML = ''; startSupabase({ url, key, src: 'local' });
+  });
+}
+
+/* ------------------------- Data operations ------------------------- */
+async function loadTasks(silent = false) {
+  if (!user || !sb || loadingNow) return false;
+  loadingNow = true; setSync('loading'); if (!silent) busy(true);
+  try {
+    const uid = user.id;
+    if (!profileEnsured) {   // profil (nama tampilan) milik sendiri; gagal = tidak fatal
+      try { const { error } = await sb.rpc('ensure_my_profile'); if (!error) profileEnsured = true; } catch {}
+    }
+    // M4: TANPA filter user_id — RLS M3.1 yang menentukan baris yang terlihat:
+    //     tugas pribadi saya + tugas yang saya bagikan + tugas yang dibagikan kepada saya.
+    const all = await fetchAll(() => sb.from('tasks').select('*').order('created_at', { ascending: false }));
+    // Penerima tugas Dibagikan (RLS: hanya tugas yang boleh saya lihat)
+    let asg = {}, asgOk = true;
+    try {
+      const rows = await fetchAll(() => sb.from('task_assignees').select('task_id,user_id').order('task_id', { ascending: true }));
+      rows.forEach(r => { asg[String(r.task_id)] = r.user_id; });
+    } catch (e) { asgOk = false; console.warn('Gagal memuat penerima tugas:', e); }
+    const own = [], recv = []; let foreign = 0;
+    for (const t of all) {
+      if (t.user_id === uid) { own.push(t); continue; }
+      // Pertahanan lapis kedua: tugas orang lain HANYA ditampilkan jika Dibagikan & penerimanya saya
+      if (t.visibility === 'shared' && asgOk && asg[String(t.id)] === uid) { t._recv = true; recv.push(t); continue; }
+      foreign++;
+    }
+    if (foreign) {
+      console.warn(`[M4] ${foreign} baris milik pengguna lain diabaikan (bukan tugas yang dibagikan kepada Anda).`);
+      if (!warnedForeign) { warnedForeign = true; toast(`Peringatan: ${foreign} data tak terduga tidak ditampilkan. Jalankan "Tes koneksi" di menu Cadangan.`, 'error'); }
+    }
+    // Nama tampilan (RLS: diri sendiri + orang yang terlibat di tugas yang sama)
+    const nm = {};
+    try {
+      const ids = [...new Set([uid, ...recv.map(t => t.user_id), ...Object.values(asg)].filter(Boolean))];
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data, error } = await sb.from('profiles').select('user_id,display_name').in('user_id', ids.slice(i, i + 200));
+        if (error) throw error;
+        (data || []).forEach(p => { if (p.display_name) nm[p.user_id] = p.display_name; });
+      }
+    } catch (e) { console.warn('Gagal memuat nama pengguna:', e); }
+    tasks = own; received = recv; assignees = asg; names = nm;
+    loadedOnce = true; lastSync = new Date(); setSync('ok'); render();
+    return true;
+  } catch (e) {
+    setSync('error');
+    if (!loadedOnce) { loadedOnce = true; render(); }
+    toast('Gagal memuat tugas: ' + dbErr(e), 'error');
+    return false;
+  } finally { loadingNow = false; if (!silent) busy(false); }
+}
+/* Ambil semua baris (per 1000) dari query yang dibuat ulang setiap halaman */
+async function fetchAll(makeQuery) {
+  const all = []; const size = 1000;
+  for (let from = 0; from < 50000; from += size) {
+    const { data, error } = await makeQuery().range(from, from + size - 1);
+    if (error) throw error;
+    all.push(...(data || []));
+    if (!data || data.length < size) break;
+  }
+  return all;
+}
+/* M4: penerima mengubah status/progres HANYA lewat RPC M3.1:
+   update_task_progress(p_task_id text, p_status text, p_progress integer, p_note text) */
+async function rpcProgress(id, { status = null, progress = null, note = null } = {}, msg = null) {
+  busy(true);
+  try {
+    const { error } = await sb.rpc('update_task_progress', { p_task_id: String(id), p_status: status, p_progress: progress, p_note: note });
+    if (error) throw error;
+    if (msg) toast(msg);
+    return true;
+  } catch (e) {
+    if (e?.code === '42501') toast('Anda tidak lagi memiliki akses untuk mengubah tugas ini (mungkin sudah dialihkan, dicabut, atau diarsipkan pemiliknya).', 'error');
+    else toast('Gagal memperbarui status: ' + dbErr(e), 'error');
+    return false;
+  } finally { busy(false); await loadTasks(true); }
+}
+function dbErr(e) {
+  const m = e?.message || String(e);
+  if (/jwt|token/i.test(m) && /expired|invalid/i.test(m)) return 'Sesi login berakhir. Silakan keluar lalu masuk kembali.';
+  if (/failed to fetch|network/i.test(m)) return 'Tidak ada koneksi internet / server tidak dapat dihubungi.';
+  if (/row-level security|permission denied/i.test(m)) return 'Akses ditolak oleh Row Level Security. Periksa kebijakan RLS tabel tasks.';
+  if (/violates check constraint/i.test(m)) return 'Nilai tidak diterima oleh aturan (check constraint) tabel. Detail: ' + m;
+  if (/column .* does not exist|could not find the .* column/i.test(m)) return 'Struktur tabel tidak cocok: ' + m;
+  return m;
+}
+async function updateTask(id, patch, { msg = null, reload = true } = {}) {
+  if (isRecv(byId(id))) { toast('Tugas ini milik pengguna lain. Anda hanya dapat mengubah statusnya.', 'error'); return false; }
+  busy(true);
+  try {
+    const { data, error } = await sb.from('tasks').update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('id', id).eq('user_id', user.id).select('id');
+    if (error) throw error;
+    if (!data || !data.length) throw new Error('Tidak ada data yang berubah. Tugas mungkin sudah dihapus atau diblokir oleh RLS.');
+    if (msg) toast(msg);
+    if (reload) await loadTasks(true);
+    return true;
+  } catch (e) { toast('Gagal menyimpan: ' + dbErr(e), 'error'); return false; }
+  finally { busy(false); }
+}
+async function insertTasks(rows) {
+  const stamp = new Date().toISOString();
+  const payload = rows.map(r => ({ ...r, user_id: user.id, updated_at: stamp }));
+  const { data, error } = await sb.from('tasks').insert(payload).select('id');
+  if (error) throw error;
+  return data || [];
+}
+async function deleteTask(id) {
+  const t = byId(id); if (!t) return;
+  if (isRecv(t)) { toast('Tugas ini milik pengguna lain dan tidak dapat Anda hapus.', 'error'); return false; }
+  const ok = await confirmDialog(isShared(t)
+    ? `Tugas "${t.title}" sedang dibagikan kepada ${recipientName(t)}. Menghapusnya juga menghapus seluruh riwayat & catatan, dan penerima kehilangan akses. Tindakan ini tidak dapat dibatalkan.`
+    : `Hapus tugas "${t.title}"? Tindakan ini tidak dapat dibatalkan.`, { title: 'Hapus tugas', yes: 'Hapus' });
+  if (!ok) return false;
+  busy(true);
+  try {
+    const { data, error } = await sb.from('tasks').delete().eq('id', id).eq('user_id', user.id).select('id');
+    if (error) throw error;
+    if (!data || !data.length) throw new Error('Tugas tidak terhapus (mungkin diblokir RLS atau sudah dihapus).');
+    toast('Tugas dihapus'); await loadTasks(true); return true;
+  } catch (e) { toast('Gagal menghapus: ' + dbErr(e), 'error'); return false; }
+  finally { busy(false); }
+}
+function nextDue(t) {
+  const today = todayStr(); let base = dOnly(t.due_date) && parseD(t.due_date) ? dOnly(t.due_date) : today;
+  const step = d => recOf(t) === RECUR.DAILY ? addDays(d, 1) : recOf(t) === RECUR.WEEKLY ? addDays(d, 7) : addMonths(d, 1);
+  let next = step(base), guard = 0;
+  while (next <= today && guard++ < 1000) next = step(next);
+  return next;
+}
+async function createNextOccurrence(t) {
+  const next = nextDue(t);
+  const { data, error } = await sb.from('tasks').select('id,due_date,status')
+    .eq('user_id', user.id).eq('title', t.title).eq('recurrence', t.recurrence);
+  if (error) throw error;
+  if ((data || []).some(r => r.status !== ST.DONE && dOnly(r.due_date) === next)) return { result: 'exists', next };
+  await insertTasks([{
+    title: t.title, description: t.description ?? null, category: t.category ?? null,
+    status: ST.TODO, importance: lvl15(t.importance), urgency: lvl15(t.urgency), impact: lvl15(t.impact),
+    due_date: next, estimated_minutes: t.estimated_minutes ?? null, recurrence: t.recurrence, completed_at: null
+  }]);
+  return { result: 'created', next };
+}
+async function completeTask(id) {
+  const t = byId(id); if (!t || isDone(t)) return;
+  if (isRecv(t)) return rpcProgress(id, { status: ST.DONE }, 'Tugas selesai ✓ · pemilik dapat melihat pembaruan ini');
+  const ok = await updateTask(id, { status: ST.DONE, completed_at: new Date().toISOString() }, { reload: false });
+  if (!ok) { await loadTasks(true); return; }
+  let msg = 'Tugas selesai ✓';
+  if (isRecurring(t) && isShared(t)) msg += ' · jadwal berikutnya dibuat otomatis oleh sistem';
+  else if (isRecurring(t)) {
+    busy(true);
+    try {
+      const r = await createNextOccurrence(t);
+      msg += r.result === 'created' ? ` · jadwal berikutnya: ${fmtDate(r.next)}` : ' · jadwal berikutnya sudah ada';
+    } catch (e) { toast('Tugas selesai, tetapi gagal membuat jadwal berikutnya: ' + dbErr(e), 'error'); msg = null; }
+    finally { busy(false); }
+  }
+  if (msg) toast(msg);
+  await loadTasks(true);
+}
+async function reopenTask(id, status = ST.TODO) {
+  // Kembali ke "Belum Mulai" → progres 0 (RPC M3.1 tidak mereset progres saat dibuka kembali)
+  const t = byId(id), resetProg = status === ST.TODO && progOf(t) > 0;
+  if (isRecv(t)) return rpcProgress(id, { status, progress: resetProg ? 0 : null }, 'Tugas dibuka kembali');
+  await updateTask(id, { status, completed_at: null, ...(isShared(t) && resetProg ? { progress_percent: 0 } : {}) }, { msg: 'Tugas dibuka kembali' });
+}
+async function toggleDone(id) { const t = byId(id); if (!t) return; isDone(t) ? reopenTask(id) : completeTask(id); }
+async function setStatus(id, status) {
+  const t = byId(id); if (!t || st(t) === status) return;
+  if (status === ST.DONE) return completeTask(id);
+  if (isDone(t)) return reopenTask(id, status);
+  if (isRecv(t)) return rpcProgress(id, { status, progress: status === ST.TODO && progOf(t) > 0 ? 0 : null }, `Status: ${STATUS_LABEL[status]}`);
+  return updateTask(id, { status }, { msg: `Status: ${STATUS_LABEL[status]}` });
+}
+async function moveQuadrant(id, q) {
+  const t = byId(id); if (!t) return; q = Number(q);
+  if (isRecv(t)) { toast('Prioritas tugas yang diterima hanya dapat diubah oleh pemiliknya.', 'error'); render(); return; }
+  if (quadOf(t) === q) return;
+  const wantImp = q === 1 || q === 2, wantUrg = q === 1 || q === 3;
+  let imp = lvl15(t.importance), urg = lvl15(t.urgency);
+  if (wantImp && imp < MATRIX_THRESHOLD) imp = MATRIX_THRESHOLD; if (!wantImp && imp >= MATRIX_THRESHOLD) imp = MATRIX_THRESHOLD - 1;
+  if (wantUrg && urg < MATRIX_THRESHOLD) urg = MATRIX_THRESHOLD; if (!wantUrg && urg >= MATRIX_THRESHOLD) urg = MATRIX_THRESHOLD - 1;
+  await updateTask(id, { importance: imp, urgency: urg }, { msg: `Dipindah ke ${QUADS[q].title}` });
+}
+
+/* ------------------------- Task modal ------------------------- */
+function openTaskModal(t = null, preset = {}) {
+  editingId = t ? t.id : null;
+  const ro = isRecv(t);   // tugas diterima: semua isian dikunci kecuali Status (disimpan lewat RPC)
+  $('#taskModalTitle').textContent = ro ? 'Detail Tugas' : t ? 'Edit Tugas' : 'Tugas Baru';
+  $('#modalDelete').classList.toggle('hidden', !t || ro);
+  ['fTitle', 'fDesc', 'fCat', 'fDue', 'fEst', 'fRec', 'fImp', 'fUrg', 'fImpact'].forEach(f => { $('#' + f).disabled = ro; });
+  $('#fStatus').disabled = ro && isArchived(t);
+  $('#taskSaveBtn').textContent = ro ? 'Simpan Status' : 'Simpan';
+  $('#taskSaveBtn').classList.toggle('hidden', ro && isArchived(t));
+  $('#taskFormMsg').innerHTML = ro
+    ? `<div class="msg info share-note">Tugas dari <b>${esc(senderName(t))}</b>. Anda dapat mengubah <b>status &amp; progres</b> dan menulis catatan; isi tugas hanya dapat diubah pemiliknya.${isArchived(t) ? ' Tugas ini sedang diarsipkan pemiliknya (hanya-baca).' : ''}</div>`
+    : (t && isShared(t)) ? `<div class="msg info share-note">Dibagikan kepada <b>${esc(recipientName(t))}</b> · progres ${progOf(t)}%.</div>` : '';
+  $('#catList').innerHTML = allCategories().map(c => `<option value="${esc(c)}">`).join('');
+  const v = t || {};
+  $('#fTitle').value = v.title || '';
+  $('#fDesc').value = v.description || '';
+  $('#fCat').value = v.category ?? preset.category ?? '';
+  $('#fStatus').value = t ? st(t) : ST.TODO;
+  $('#fDue').value = dOnly(v.due_date) || preset.due_date || '';
+  $('#fEst').value = v.estimated_minutes ?? '';
+  $('#fRec').value = t ? recOf(t) : RECUR.NONE;
+  $('#fImp').value = t ? lvl15(v.importance) : (preset.importance || 3);
+  $('#fUrg').value = t ? lvl15(v.urgency) : (preset.urgency || 3);
+  $('#fImpact').value = t ? lvl15(v.impact) : 3;
+  updatePreview();
+  renderCollab(t);
+  $('#taskModal').classList.remove('hidden');
+  setTimeout(() => $('#fTitle').focus(), 50);
+}
+function closeTaskModal() { $('#taskModal').classList.add('hidden'); editingId = null; $('#taskSaveBtn').classList.remove('hidden'); $('#collabBox').innerHTML = ''; actSeq++; }
+function formValues() {
+  return {
+    title: $('#fTitle').value.trim(), description: $('#fDesc').value.trim(), category: $('#fCat').value.trim(),
+    status: $('#fStatus').value, due_date: $('#fDue').value, estimated_minutes: $('#fEst').value,
+    recurrence: $('#fRec').value, importance: +$('#fImp').value, urgency: +$('#fUrg').value, impact: +$('#fImpact').value
+  };
+}
+function updatePreview() {
+  $('#vImp').textContent = $('#fImp').value; $('#vUrg').textContent = $('#fUrg').value; $('#vImpact').textContent = $('#fImpact').value;
+  const f = formValues(); const s = scoreOf(f);
+  $('#scorePreview').innerHTML = `<div class="preview-score" style="--lvl:${s.level.color}"><div class="big">${s.score}</div><div style="flex:1"><b>Prioritas ${s.level.label}</b> · ${QUADS[quadOf(f)].title}<details class="why"><summary>Lihat perhitungan skor</summary>${explainHTML(s)}</details></div></div>`;
+}
+async function saveTaskForm(e) {
+  e.preventDefault();
+  if (editingId && isRecv(byId(editingId))) {   // tugas diterima: hanya status, lewat RPC
+    const id = editingId, t = byId(id), stNew = $('#fStatus').value;
+    closeTaskModal();
+    if (t && st(t) !== stNew) await setStatus(id, stNew); else toast('Tidak ada perubahan status');
+    return;
+  }
+  const f = formValues(); const msgEl = $('#taskFormMsg');
+  const err = m => { msgEl.innerHTML = `<div class="msg error">${esc(m)}</div>`; };
+  if (!f.title) return err('Judul tugas wajib diisi.');
+  if (f.due_date && !parseD(f.due_date)) return err('Tanggal tenggat tidak valid.');
+  let est = null;
+  if (f.estimated_minutes !== '') { est = Number(f.estimated_minutes); if (!Number.isInteger(est) || est < 0 || est > 100000) return err('Estimasi harus bilangan bulat 0–100000 menit.'); }
+  let due = f.due_date || null;
+  if (f.recurrence !== RECUR.NONE && !due) { due = todayStr(); toast('Tugas berulang memerlukan tenggat — diatur ke hari ini.'); }
+  const row = {
+    title: f.title.slice(0, 200), description: f.description || null, category: f.category || null,
+    importance: f.importance, urgency: f.urgency, impact: f.impact, due_date: due,
+    estimated_minutes: est, recurrence: f.recurrence
+  };
+  const btn = $('#taskSaveBtn'); btn.disabled = true; btn.textContent = 'Menyimpan…';
+  try {
+    if (editingId) {
+      const t = byId(editingId); const wasDone = t && isDone(t); const willDone = f.status === ST.DONE;
+      row.status = f.status;
+      if (!wasDone && willDone) row.completed_at = new Date().toISOString();
+      if (wasDone && !willDone) row.completed_at = null;
+      const id = editingId;
+      const ok = await updateTask(id, row, { reload: false });
+      if (!ok) return;
+      closeTaskModal();
+      if (!wasDone && willDone && f.recurrence !== RECUR.NONE && isShared(t)) toast('Disimpan · jadwal berikutnya dibuat otomatis oleh sistem');
+      else if (!wasDone && willDone && f.recurrence !== RECUR.NONE) {
+        try { const r = await createNextOccurrence({ ...t, ...row }); toast(r.result === 'created' ? `Disimpan · jadwal berikutnya: ${fmtDate(r.next)}` : 'Disimpan · jadwal berikutnya sudah ada'); }
+        catch (e2) { toast('Disimpan, tetapi gagal membuat jadwal berikutnya: ' + dbErr(e2), 'error'); }
+      } else toast('Perubahan disimpan');
+      await loadTasks(true);
+    } else {
+      row.status = f.status;
+      row.completed_at = f.status === ST.DONE ? new Date().toISOString() : null;
+      busy(true);
+      try { await insertTasks([row]); } finally { busy(false); }
+      closeTaskModal(); toast('Tugas ditambahkan'); await loadTasks(true);
+    }
+  } catch (e2) { err('Gagal menyimpan: ' + dbErr(e2)); }
+  finally { btn.disabled = false; btn.textContent = 'Simpan'; }
+}
+
+/* ------------------------- M4.2: berbagi & kolaborasi -------------------------
+   Semua aksi memakai RPC M3.1 (031-sharing.sql) dengan nama parameter PERSIS:
+     share_task(p_task_id text, p_email text, p_note text)          → jsonb {task_id, recipient_id, recipient_name}
+     revoke_share(p_task_id text, p_reason text)                    → void
+     decline_task(p_task_id text, p_reason text)                    → void
+     handover_task(p_task_id text, p_email text, p_note text)       → jsonb {task_id, recipient_id, recipient_name}
+     update_task_progress(p_task_id text, p_status text, p_progress integer, p_note text) → void
+     add_task_note(p_task_id text, p_text text)                     → void
+   Pemeriksaan izin di sini hanya untuk tampilan; RLS & RPC di database tetap pengaman utama. */
+let actSeq = 0;                       // menandai isi modal yang sudah usang saat riwayat dimuat
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const canShare = t => !!t && !isRecv(t) && !isShared(t) && !isArchived(t) && t.visibility === 'private';
+const canRevoke = t => !!t && !isRecv(t) && isShared(t);
+const canDecline = t => isRecv(t);
+const canHandover = t => !!t && isShared(t) && !isArchived(t);          // pemilik ATAU penerima saat ini
+const canProgress = t => !!t && !(isRecv(t) && isArchived(t));
+function sessionExpiredErr() { const e = new Error('Sesi login berakhir. Silakan keluar lalu masuk kembali.'); e.code = 'SESSION'; return e; }
+async function ensureSession() {
+  const { data, error } = await sb.auth.getSession();
+  if (error || !data?.session?.access_token) throw sessionExpiredErr();
+  if (data.session.expires_at && data.session.expires_at * 1000 < Date.now()) {
+    const { data: r, error: re } = await sb.auth.refreshSession();
+    if (re || !r?.session) throw sessionExpiredErr();
+  }
+}
+/* Pesan galat RPC: pesan dari SQL M3.1 sudah berbahasa Indonesia & sengaja umum */
+function rpcErr(e) {
+  const m = e?.message || String(e), c = e?.code || '';
+  if (c === 'SESSION' || (/jwt|token/i.test(m) && /expired|invalid/i.test(m)) || c === 'PGRST301') return 'Sesi login berakhir. Silakan keluar lalu masuk kembali.';
+  if (c === 'PGRST202' || /could not find the function/i.test(m)) return 'Fungsi berbagi belum tersedia di database (M3.1 belum aktif?). Hubungi admin.';
+  if (['42501', '22023', 'P0002', '23505', '23514', '23503'].includes(c) && m) return m;
+  return dbErr(e);
+}
+async function callRpc(name, args) {
+  await ensureSession();
+  const { data, error } = await sb.rpc(name, args);
+  if (error) throw error;
+  return data;
+}
+/* Dialog aksi: menjalankan run() di dalam dialog; galat tampil tanpa menutup dialog */
+function actionDialog({ title, text = '', email = false, note = null, noteRequired = false, ok = 'OK', danger = false, run }) {
+  return new Promise(resolve => {
+    const m = $('#actModal'), f = $('#actForm'), okBtn = $('#actOk');
+    $('#actTitle').textContent = title; $('#actText').textContent = text; $('#actMsg').innerHTML = '';
+    $('#actEmailWrap').classList.toggle('hidden', !email); $('#actEmail').value = '';
+    $('#actNoteWrap').classList.toggle('hidden', !note); $('#actNote').value = ''; $('#actNoteLbl').textContent = note || '';
+    okBtn.textContent = ok; okBtn.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary'); okBtn.disabled = false;
+    m.classList.remove('hidden'); setTimeout(() => (email ? $('#actEmail') : note ? $('#actNote') : okBtn).focus(), 50);
+    let running = false;
+    const finish = v => { m.classList.add('hidden'); f.onsubmit = null; m.onclick = null; resolve(v); };
+    m.onclick = e => { if (!running && (e.target === m || e.target.closest('[data-action="act-cancel"]'))) finish(null); };
+    f.onsubmit = async e => {
+      e.preventDefault(); if (running) return;                       // cegah klik ganda
+      const em = $('#actEmail').value.trim().toLowerCase(), nt = $('#actNote').value.trim();
+      const err = msg => { $('#actMsg').innerHTML = `<div class="msg error">${esc(msg)}</div>`; };
+      if (email && !EMAIL_RE.test(em)) return err('Masukkan alamat email yang valid.');
+      if (email && user?.email && em === user.email.toLowerCase()) return err('Tidak bisa menggunakan email Anda sendiri.');
+      if (noteRequired && !nt) return err('Isian ini wajib diisi.');
+      running = true; okBtn.disabled = true; const old = okBtn.textContent; okBtn.textContent = 'Memproses…'; busy(true);
+      try { const r = await run({ email: em, note: nt || null }); finish(r ?? true); }
+      catch (ex) { err(rpcErr(ex)); if (ex?.code === '42501') { await loadTasks(true); } }
+      finally { running = false; okBtn.disabled = false; okBtn.textContent = old; busy(false); }
+    };
+  });
+}
+function closeActModal() { const m = $('#actModal'); if (!m.classList.contains('hidden')) m.onclick?.({ target: m }); }
+/* Setelah aksi: muat ulang data; perbarui isi modal jika tugas masih boleh dilihat, jika tidak tutup modal */
+async function afterShareAction(id, { keepOpen = true } = {}) {
+  await loadTasks(true);
+  if ($('#taskModal').classList.contains('hidden') || String(editingId) !== String(id)) return;
+  const t = byId(id);
+  if (!t || !keepOpen) { closeTaskModal(); return; }
+  // Sifat tugas (pribadi/dibagikan/diterima) bisa berubah → buka ulang agar mode edit/hanya-baca tepat.
+  // Isian form yang belum disimpan dipertahankan untuk pemilik.
+  const keep = isRecv(t) ? null : formValues();
+  openTaskModal(t);
+  if (keep) { $('#fTitle').value = keep.title; $('#fDesc').value = keep.description; $('#fCat').value = keep.category; $('#fDue').value = keep.due_date;
+    $('#fEst').value = keep.estimated_minutes; $('#fRec').value = keep.recurrence; $('#fImp').value = keep.importance; $('#fUrg').value = keep.urgency; $('#fImpact').value = keep.impact; updatePreview(); }
+}
+async function shareTask(id) {
+  const t = byId(id); if (!canShare(t)) return toast('Tugas ini tidak dapat dibagikan.', 'error');
+  const r = await actionDialog({ title: 'Bagikan tugas', text: `Bagikan "${t.title}" kepada satu pengguna terdaftar. Penerima dapat melihat tugas, mengubah status & progres, menulis catatan, menolak, atau mengalihkannya. Anda tetap pemiliknya.`,
+    email: true, note: 'Pesan untuk penerima (opsional)', ok: 'Bagikan',
+    run: ({ email, note }) => callRpc('share_task', { p_task_id: String(id), p_email: email, p_note: note }) });
+  if (!r) return;
+  toast(`Tugas dibagikan kepada ${r.recipient_name || 'penerima'}`);
+  await afterShareAction(id);
+}
+async function revokeShare(id) {
+  const t = byId(id); if (!canRevoke(t)) return toast('Hanya pemilik yang dapat mencabut pembagian.', 'error');
+  const r = await actionDialog({ title: 'Cabut pembagian', text: `Cabut pembagian "${t.title}" dari ${recipientName(t)}? Tugas kembali menjadi pribadi dan ${recipientName(t)} langsung kehilangan akses. Riwayat & catatan tetap tersimpan untuk Anda.`,
+    note: 'Alasan (opsional)', ok: 'Cabut', danger: true,
+    run: ({ note }) => callRpc('revoke_share', { p_task_id: String(id), p_reason: note }) });
+  if (!r) return;
+  toast('Pembagian dicabut — tugas kembali pribadi');
+  await afterShareAction(id);
+}
+async function declineTask(id) {
+  const t = byId(id); if (!canDecline(t)) return toast('Hanya penerima yang dapat menolak tugas.', 'error');
+  const r = await actionDialog({ title: 'Tolak tugas', text: `Tolak tugas "${t.title}" dari ${senderName(t)}? Tugas akan kembali kepada pemiliknya dan Anda tidak dapat melihatnya lagi.`,
+    note: 'Alasan (opsional, terlihat oleh pemilik)', ok: 'Tolak tugas', danger: true,
+    run: ({ note }) => callRpc('decline_task', { p_task_id: String(id), p_reason: note }) });
+  if (!r) return;
+  toast('Tugas ditolak dan dikembalikan kepada pemilik');
+  await afterShareAction(id, { keepOpen: false });
+}
+async function handoverTask(id) {
+  const t = byId(id); if (!canHandover(t)) return toast('Tugas ini tidak dapat dialihkan.', 'error');
+  const asRecipient = isRecv(t);
+  const r = await actionDialog({ title: 'Alihkan tugas (handover)',
+    text: asRecipient
+      ? `Alihkan "${t.title}" ke pengguna lain. Anda akan kehilangan akses; penerima baru dapat membaca seluruh riwayat & catatan. Pemilik tetap ${senderName(t)}.`
+      : `Alihkan "${t.title}" dari ${recipientName(t)} ke pengguna lain. ${recipientName(t)} kehilangan akses; penerima baru dapat membaca seluruh riwayat & catatan. Anda tetap pemiliknya.`,
+    email: true, note: 'Catatan serah terima (opsional)', ok: 'Alihkan',
+    run: ({ email, note }) => callRpc('handover_task', { p_task_id: String(id), p_email: email, p_note: note }) });
+  if (!r) return;
+  toast(`Tugas dialihkan kepada ${r.recipient_name || 'penerima baru'}`);
+  await afterShareAction(id, { keepOpen: !asRecipient });
+}
+async function saveProgress(id) {
+  const t = byId(id); if (!canProgress(t)) return toast('Progres tugas ini tidak dapat diubah.', 'error');
+  const v = clamp(Math.round(Number($('#fProg')?.value) || 0), 0, 100);
+  if (v === progOf(t)) return toast('Progres tidak berubah');
+  const btn = $('#progSaveBtn'); if (btn) btn.disabled = true; busy(true);
+  try { await callRpc('update_task_progress', { p_task_id: String(id), p_status: null, p_progress: v, p_note: null }); toast(`Progres disimpan: ${v}%`); await afterShareAction(id); }
+  catch (e) { toast('Gagal menyimpan progres: ' + rpcErr(e), 'error'); if (e?.code === '42501') await afterShareAction(id); }
+  finally { busy(false); if ($('#progSaveBtn')) $('#progSaveBtn').disabled = false; }
+}
+async function addNote(id) {
+  const ta = $('#noteText'); const text = (ta?.value || '').trim();
+  if (!text) return toast('Catatan tidak boleh kosong.', 'error');
+  if (text.length > 2000) return toast('Catatan maksimal 2000 karakter.', 'error');
+  const btn = $('#noteSaveBtn'); if (btn?.disabled) return; if (btn) btn.disabled = true; busy(true);
+  try { await callRpc('add_task_note', { p_task_id: String(id), p_text: text }); if (ta) ta.value = ''; toast('Catatan ditambahkan'); loadActivity(id); }
+  catch (e) { toast('Gagal menambah catatan: ' + rpcErr(e), 'error'); if (e?.code === '42501') await afterShareAction(id); }
+  finally { busy(false); if ($('#noteSaveBtn')) $('#noteSaveBtn').disabled = false; }
+}
+/* ---- Riwayat aktivitas (task_activity; RLS: hanya tugas yang boleh dilihat) ---- */
+const FIELD_LABEL = { title: 'judul', description: 'deskripsi', category: 'kategori', importance: 'kepentingan', urgency: 'urgensi', impact: 'dampak',
+  due_date: 'tenggat', estimated_minutes: 'estimasi', recurrence: 'pengulangan', notes: 'catatan tugas' };
+const stLabel = v => STATUS_LABEL[v] || (v === 'waiting' ? 'Menunggu' : v === 'cancelled' ? 'Dibatalkan' : v || '-');
+const who = uid => uid ? `${nameOf(uid)}${user && uid === user.id ? ' (Anda)' : ''}` : 'Sistem';
+function activityHTML(a) {
+  const d = a.details || {}; let txt = '', cls = '', extra = '';
+  switch (a.event_type) {
+    case 'created': txt = d.source === 'recurrence' ? 'membuat jadwal berulang berikutnya' : 'membuat tugas'; break;
+    case 'updated': {
+      const ch = d.changes || {};
+      const parts = Object.keys(ch).map(k => {
+        const v = ch[k] || {};
+        if (k === 'due_date') return `tenggat ${v.old ? fmtDate(v.old) : '–'} → ${v.new ? fmtDate(v.new) : '–'}`;
+        if (k === 'title') return `judul "${v.old ?? ''}" → "${v.new ?? ''}"`;
+        if (['importance', 'urgency', 'impact'].includes(k)) return `${FIELD_LABEL[k]} ${v.old ?? '–'} → ${v.new ?? '–'}`;
+        return FIELD_LABEL[k] || k;
+      });
+      txt = 'mengubah ' + (parts.join(', ') || 'tugas'); break;
+    }
+    case 'status_changed': txt = `mengubah status: ${stLabel(d.old_status)} → ${stLabel(d.new_status)}`; break;
+    case 'completed': txt = 'menyelesaikan tugas'; break;
+    case 'reopened': txt = `membuka kembali tugas (${stLabel(d.new_status)})`; break;
+    case 'progress_changed': txt = `mengubah progres: ${d.old ?? 0}% → ${d.new ?? 0}%`; break;
+    case 'archived': txt = 'mengarsipkan tugas'; cls = 'warn'; break;
+    case 'unarchived': txt = 'membatalkan arsip'; break;
+    case 'assigned': txt = `membagikan tugas kepada ${who(d.user_id)}`; break;
+    case 'unassigned': txt = `melepas ${who(d.user_id)} dari tugas`; cls = 'warn'; break;
+    case 'handover': txt = a.actor_user_id && a.actor_user_id === d.from_user
+        ? `mengalihkan tugasnya kepada ${who(d.to_user)}` : `mengalihkan tugas dari ${who(d.from_user)} kepada ${who(d.to_user)}`; extra = d.note || ''; break;
+    case 'declined': txt = 'menolak tugas'; extra = d.reason ? 'Alasan: ' + d.reason : ''; cls = 'warn'; break;
+    case 'revoked': txt = `mencabut pembagian dari ${who(d.user_id)}`; extra = d.reason ? 'Alasan: ' + d.reason : ''; cls = 'warn'; break;
+    case 'note': txt = 'menulis catatan'; extra = d.text || ''; cls = 'note'; break;
+    default: txt = a.event_type;
+  }
+  return `<div class="act-item ${cls}"><span class="who">${esc(who(a.actor_user_id))}</span> ${esc(txt)}<span class="when">${esc(fmtDateTime(a.event_timestamp))}</span>${extra ? `<div class="txt">${esc(extra)}</div>` : ''}</div>`;
+}
+async function loadActivity(id) {
+  const box = $('#actList'); if (!box) return;
+  const seq = ++actSeq; box.innerHTML = '<div class="muted small">Memuat riwayat…</div>';
+  try {
+    await ensureSession();
+    const { data, error } = await sb.from('task_activity').select('id,event_type,actor_user_id,event_timestamp,details')
+      .eq('task_id', id).order('event_timestamp', { ascending: true }).limit(500);
+    if (error) throw error;
+    const rows = (data || []).slice().sort((a, b) => String(a.event_timestamp).localeCompare(String(b.event_timestamp)) || (Number(a.id) - Number(b.id)));
+    // Nama pelaku/pihak yang belum dikenal (RLS profiles: hanya orang yang terlibat di tugas yang sama)
+    const need = [...new Set(rows.flatMap(a => [a.actor_user_id, a.details?.user_id, a.details?.from_user, a.details?.to_user]).filter(u => u && !names[u]))];
+    if (need.length) {
+      const { data: ps } = await sb.from('profiles').select('user_id,display_name').in('user_id', need.slice(0, 200));
+      (ps || []).forEach(p => { if (p.display_name) names[p.user_id] = p.display_name; });
+    }
+    if (seq !== actSeq || !$('#actList')) return;           // modal sudah ditutup/berganti tugas
+    $('#actList').innerHTML = rows.length ? rows.map(activityHTML).join('') : '<div class="muted small">Belum ada riwayat.</div>';
+    $('#actList').scrollTop = $('#actList').scrollHeight;
+  } catch (e) {
+    if (seq === actSeq && $('#actList')) $('#actList').innerHTML = `<div class="msg error">Gagal memuat riwayat: ${esc(rpcErr(e))}</div>`;
+  }
+}
+function renderCollab(t) {
+  const box = $('#collabBox'); if (!box) return;
+  if (!t) { box.innerHTML = ''; return; }
+  const id = esc(t.id), recv = isRecv(t);
+  let share = '';
+  if (recv) share = `<div class="collab-row"><div class="grow">Dari <b>${esc(senderName(t))}</b> · penerima saat ini: <b>Anda</b>${isArchived(t) ? ' · <span class="badge warn">Diarsipkan pemilik</span>' : ''}</div>
+      ${canHandover(t) ? `<button type="button" class="btn btn-sm" data-action="handover" data-id="${id}">${svg('send', 14)}Alihkan</button>` : ''}
+      <button type="button" class="btn btn-sm" style="color:var(--danger)" data-action="decline" data-id="${id}">Tolak tugas</button></div>`;
+  else if (isShared(t)) share = `<div class="collab-row"><div class="grow">Dibagikan kepada <b>${esc(recipientName(t))}</b></div>
+      ${canHandover(t) ? `<button type="button" class="btn btn-sm" data-action="handover" data-id="${id}">${svg('send', 14)}Alihkan</button>` : ''}
+      <button type="button" class="btn btn-sm" style="color:var(--danger)" data-action="revoke" data-id="${id}">Cabut</button></div>`;
+  else if (canShare(t)) share = `<div class="collab-row"><div class="grow muted">Tugas pribadi — hanya Anda yang dapat melihatnya.</div>
+      <button type="button" class="btn btn-sm btn-primary" data-action="share" data-id="${id}">${svg('share', 14)}Bagikan</button></div>`;
+  else share = `<div class="muted small">Tugas ini tidak dapat dibagikan.</div>`;
+  const prog = canProgress(t) ? `<div class="prog-edit"><input type="range" id="fProg" min="0" max="100" step="5" value="${progOf(t)}" aria-label="Progres">
+      <b id="vProg">${progOf(t)}%</b><button type="button" class="btn btn-sm" id="progSaveBtn" data-action="save-progress" data-id="${id}">Simpan progres</button></div>`
+    : `<div class="muted small">Progres ${progOf(t)}% (hanya-baca)</div>`;
+  const canNote = !(recv && isArchived(t));
+  box.innerHTML = `<div class="collab">
+    <div><h4>Berbagi</h4>${share}</div>
+    <div><h4>Progres</h4>${prog}</div>
+    <div><h4>Aktivitas &amp; Catatan <span class="pill" style="text-transform:none;letter-spacing:0">urut waktu · terbaru di bawah</span></h4>
+      <div class="act-list" id="actList"></div>
+      ${canNote ? `<div class="field" style="margin:10px 0 0"><textarea class="input" id="noteText" maxlength="2000" placeholder="Tulis catatan atau pembaruan pekerjaan…" style="min-height:60px"></textarea></div>
+      <div class="collab-row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-sm btn-primary" id="noteSaveBtn" data-action="add-note" data-id="${id}">Tambah catatan</button></div>` : ''}
+    </div></div>`;
+  loadActivity(t.id);
+}
+
+/* ------------------------- Components ------------------------- */
+function shareBadges(t) {
+  if (isRecv(t)) return `<span class="badge from" title="Dibagikan kepada Anda">${svg('inbox', 11)} Dari: ${esc(senderName(t))}</span>`
+    + (progOf(t) ? `<span class="badge prog">${progOf(t)}%<span class="bar"><i style="width:${progOf(t)}%"></i></span></span>` : '')
+    + (isArchived(t) ? `<span class="badge warn">Diarsipkan pemilik</span>` : '');
+  if (isShared(t)) return `<span class="badge to" title="Anda membagikan tugas ini">${svg('send', 11)} Ke: ${esc(recipientName(t))}</span>`
+    + (progOf(t) ? `<span class="badge prog">${progOf(t)}%<span class="bar"><i style="width:${progOf(t)}%"></i></span></span>` : '');
+  return progOf(t) && !isDone(t) ? `<span class="badge prog">${progOf(t)}%<span class="bar"><i style="width:${progOf(t)}%"></i></span></span>` : '';
+}
+function taskCard(t, { compact = false } = {}) {
+  const s = scoreOf(t), done = isDone(t), od = isOverdue(t), id = esc(t.id), recv = isRecv(t), locked = recv && isArchived(t);
+  const dk = t.due_date ? daysUntil(t.due_date) : null;
+  return `<article class="task lvl-${s.level.key} ${done ? 'is-done' : ''} ${recv ? 'is-recv' : ''}">
+    <button class="check ${done ? 'on' : ''}" data-action="toggle" data-id="${id}" ${locked ? 'disabled' : ''} title="${done ? 'Buka kembali' : 'Tandai selesai'}" aria-label="${done ? 'Buka kembali' : 'Tandai selesai'}">${svg('check', 13)}</button>
+    <div class="task-body">
+      <div class="task-top"><h4 class="task-title">${esc(t.title)}</h4><span class="score" style="--lvl:${s.level.color}" title="Skor prioritas">${s.score}</span></div>
+      ${t.description && !compact ? `<p class="task-desc">${esc(t.description)}</p>` : ''}
+      <div class="meta">
+        ${shareBadges(t)}
+        <span class="badge lvl" style="--lvl:${s.level.color}">${s.level.label}</span>
+        ${t.category ? `<span class="badge">${esc(t.category)}</span>` : ''}
+        ${t.due_date ? `<span class="badge ${od ? 'danger' : (!done && dk === 0) ? 'warn' : ''}">${svg('calendar', 11)} ${esc(dueLabel(t))}</span>` : ''}
+        ${t.estimated_minutes ? `<span class="badge">${svg('clock', 11)} ${fmtMin(t.estimated_minutes)}</span>` : ''}
+        ${isRecurring(t) ? `<span class="badge info">${svg('repeat', 11)} ${REC_LABEL[recOf(t)]}</span>` : ''}
+        ${st(t) === ST.DOING ? `<span class="badge info">Dikerjakan</span>` : ''}
+        ${done && t.completed_at ? `<span class="badge ok">Selesai ${esc(fmtDateTime(t.completed_at))}</span>` : ''}
+      </div>
+      ${compact ? '' : `<details class="why"><summary>Kenapa skornya ${s.score}?</summary>${explainHTML(s)}</details>`}
+    </div>
+    <div class="task-actions">
+      ${recv
+        ? `<button class="icon-btn" data-action="edit" data-id="${id}" title="Lihat detail" aria-label="Lihat detail">${svg('eye', 16)}</button>`
+        : `<button class="icon-btn" data-action="edit" data-id="${id}" title="Edit" aria-label="Edit">${svg('edit', 16)}</button>
+      ${isArchived(t) ? '' : `<button class="icon-btn" data-action="share-open" data-id="${id}" title="${isShared(t) ? 'Kelola berbagi' : 'Bagikan'}" aria-label="${isShared(t) ? 'Kelola berbagi' : 'Bagikan'}">${svg('share', 16)}</button>`}
+      <button class="icon-btn danger" data-action="delete" data-id="${id}" title="Hapus" aria-label="Hapus">${svg('trash', 16)}</button>`}
+    </div>
+  </article>`;
+}
+function listOf(arr, emptyText = 'Tidak ada tugas.', opts) {
+  if (!arr.length) return `<div class="empty card"><div class="em-ic">✨</div>${esc(emptyText)}</div>`;
+  return `<div class="list">${arr.map(t => taskCard(t, opts)).join('')}</div>`;
+}
+function emptyState(text, withBtn = true) {
+  return `<div class="empty card"><div class="em-ic">🗂️</div><div>${esc(text)}</div>${withBtn ? `<button class="btn btn-primary" style="margin-top:12px" data-action="new">${svg('plus', 16)}Tambah tugas</button>` : ''}</div>`;
+}
+function statCard(k, v, s, cls = '', icon = '') { return `<div class="card stat ${cls}"><div class="k">${icon ? svg(icon, 14) : ''}${k}</div><div class="v">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`; }
+function vbars(items) {
+  const max = Math.max(1, ...items.map(i => i.value));
+  return `<div class="vbars">${items.map(i => `<div class="vbar ${i.cls || ''}" title="${esc(i.title || i.label)}: ${i.value}"><div class="val">${i.value}</div><div class="b ${i.value ? '' : 'zero'}" style="height:${Math.max(2, i.value / max * 100)}%"></div><div class="lb">${esc(i.label)}</div></div>`).join('')}</div>`;
+}
+function hbars(items, emptyText = 'Belum ada data.') {
+  if (!items.length) return `<div class="muted small">${esc(emptyText)}</div>`;
+  const max = Math.max(1, ...items.map(i => i.value));
+  return `<div class="hbars">${items.map(i => `<div class="hbar-row"><div class="nm" title="${esc(i.label)}">${esc(i.label)}</div><div class="hbar-track"><i style="width:${i.value / max * 100}%;--c:${i.color || 'var(--primary)'}"></i></div><div class="nv">${i.value}</div></div>`).join('')}</div>`;
+}
+function skeleton() { return `<div class="list">${'<div class="skeleton"></div>'.repeat(5)}</div>`; }
+
+/* ------------------------- Views ------------------------- */
+function computeStats(tasks = statTasks()) {
+  const today = todayStr(); const [ws, we] = weekRange();
+  const active = tasks.filter(isActive), done = tasks.filter(isDone);
+  return {
+    total: tasks.length,
+    doing: active.filter(t => st(t) === ST.DOING).length,
+    avgProg: active.length ? Math.round(active.reduce((a, t) => a + progOf(t), 0) / active.length) : 0,
+    active: active.length,
+    doneToday: done.filter(t => localDateOfISO(t.completed_at) === today).length,
+    overdue: active.filter(isOverdue).length,
+    dueToday: active.filter(t => dOnly(t.due_date) === today).length,
+    dueWeek: active.filter(t => { const d = dOnly(t.due_date); return d && d >= ws && d <= we; }).length,
+    high: active.filter(t => scoreOf(t).score >= 60).length,
+    pct: tasks.length ? Math.round(done.length / tasks.length * 100) : 0,
+    done: done.length
+  };
+}
+function renderDashboard() {
+  const tasks = statTasks();   // M4.2a: seluruh isi Dashboard mengikuti filter cakupan
+  if (!tasks.length) return `${scopeBar()}<div class="grid stats">${statCard('Tugas aktif', 0)}${statCard('Selesai hari ini', 0)}${statCard('Terlambat', 0)}${statCard('Jatuh tempo hari ini', 0)}</div><div style="margin-top:16px">${emptyState(ui.scope === 'all' ? 'Belum ada tugas. Mulai dengan menambahkan tugas pertama Anda.' : scopeEmpty(), ui.scope !== 'received')}</div>`;
+  const s = computeStats(tasks); const rec = recommended(5, tasks); const top = rec[0];
+  const days = []; for (let i = 6; i >= 0; i--) { const d = addDays(todayStr(), -i); days.push(d); }
+  const doneBy = d => tasks.filter(t => isDone(t) && localDateOfISO(t.completed_at) === d).length;
+  const weekItems = days.map(d => ({ label: fmtDate(d, { weekday: 'short' }), title: fmtDate(d), value: doneBy(d), cls: d === todayStr() ? 'today' : '' }));
+  const weekTotal = weekItems.reduce((a, b) => a + b.value, 0);
+  const prevTotal = [...Array(7)].map((_, i) => doneBy(addDays(todayStr(), -7 - i))).reduce((a, b) => a + b, 0);
+  const createdWeek = tasks.filter(t => { const d = localDateOfISO(t.created_at); return d && d >= days[0]; }).length;
+  const catMap = {}; tasks.filter(isActive).forEach(t => { const c = t.category || 'Tanpa kategori'; catMap[c] = (catMap[c] || 0) + 1; });
+  const catItems = Object.entries(catMap).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
+  const trend = prevTotal === 0 ? (weekTotal ? 'Naik dari 0 minggu lalu' : 'Belum ada penyelesaian') : `${weekTotal >= prevTotal ? '▲' : '▼'} ${Math.abs(Math.round((weekTotal - prevTotal) / prevTotal * 100))}% vs 7 hari sebelumnya`;
+  return `${scopeBar()}
+  <div class="grid stats">
+    ${statCard('Tugas aktif', s.active, `${s.doing} dikerjakan · progres rata-rata ${s.avgProg}%`, 'pri', 'list')}
+    ${statCard('Selesai hari ini', s.doneToday, 'Terus pertahankan!', 'ok', 'completed')}
+    ${statCard('Terlambat', s.overdue, s.overdue ? 'Perlu segera ditangani' : 'Tidak ada yang terlambat 👍', s.overdue ? 'danger' : '', 'alert')}
+    ${statCard('Jatuh tempo hari ini', s.dueToday, '', s.dueToday ? 'warn' : '', 'clock')}
+    ${statCard('Jatuh tempo minggu ini', s.dueWeek, 'Senin – Minggu', '', 'calendar')}
+    ${statCard('Prioritas tinggi', s.high, 'Skor ≥ 60 (Tinggi/Kritis)', s.high ? 'danger' : '', 'flame')}
+    ${statCard('Persentase selesai', s.pct + '%', `${s.done} dari ${tasks.length} tugas`, 'ok', 'target')}
+    ${statCard('Beban kerja aktif', fmtMin(tasks.filter(isActive).reduce((a, t) => a + (Number(t.estimated_minutes) || 0), 0)), 'Total estimasi tugas aktif', '', 'clock')}
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div>
+      ${top ? `<div class="card hero"><div class="big-score">${scoreOf(top).score}</div><div class="eyebrow">⚡ Kerjakan ini dulu${isRecv(top) ? ' · dari ' + esc(senderName(top)) : ''}</div><h2>${esc(top.title)}</h2><p>${esc(reasonText(top))}</p>
+        <div class="hero-actions"><button class="btn btn-sm" data-action="toggle" data-id="${esc(top.id)}">${svg('check', 14)}Tandai selesai</button>${st(top) !== ST.DOING ? `<button class="btn btn-sm" data-action="start" data-id="${esc(top.id)}">Mulai kerjakan</button>` : ''}<button class="btn btn-sm" data-action="edit" data-id="${esc(top.id)}">Detail</button></div></div>`
+      : `<div class="card empty">🎉 Semua tugas sudah selesai!</div>`}
+      <div class="section-title">Rekomendasi hari ini <span class="pill">urut skor prioritas</span></div>
+      ${listOf(rec.slice(1), 'Tidak ada tugas lain yang direkomendasikan.')}
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="card"><div class="card-h"><h3>Produktivitas 7 hari</h3><span class="pill">${weekTotal} selesai</span></div>
+        ${vbars(weekItems)}<div class="small muted" style="margin-top:8px">${esc(trend)} · ${createdWeek} tugas dibuat dalam 7 hari terakhir</div></div>
+      <div class="card"><div class="card-h"><h3>Distribusi kategori</h3><span class="pill">tugas aktif</span></div>${hbars(catItems, 'Tidak ada tugas aktif.')}</div>
+    </div>
+  </div>`;
+}
+function renderToday() {
+  const today = todayStr();
+  const overdue = tasks.filter(isOverdue).sort(cmpPriority);
+  const dueToday = tasks.filter(t => isActive(t) && dOnly(t.due_date) === today).sort(cmpPriority);
+  const shown = new Set([...overdue, ...dueToday].map(t => t.id));
+  const recs = recommended(20).filter(t => !shown.has(t.id)).slice(0, 5);
+  const doneToday = tasks.filter(t => isDone(t) && localDateOfISO(t.completed_at) === today);
+  const load = [...overdue, ...dueToday].reduce((a, t) => a + (Number(t.estimated_minutes) || 0), 0);
+  return `
+  <div class="grid stats">
+    ${statCard('Terlambat', overdue.length, '', overdue.length ? 'danger' : '', 'alert')}
+    ${statCard('Jatuh tempo hari ini', dueToday.length, '', 'warn', 'clock')}
+    ${statCard('Estimasi beban hari ini', fmtMin(load), 'Terlambat + hari ini', '', 'clock')}
+    ${statCard('Selesai hari ini', doneToday.length, '', 'ok', 'completed')}
+  </div>
+  <div class="section-title">Terlambat <span class="pill">${overdue.length}</span></div>
+  ${listOf(overdue, 'Tidak ada tugas yang terlambat. 👍')}
+  <div class="section-title">Jatuh tempo hari ini · ${esc(fmtDate(today, { weekday: 'long', day: 'numeric', month: 'long' }))} <span class="pill">${dueToday.length}</span></div>
+  ${listOf(dueToday, 'Tidak ada tugas dengan tenggat hari ini.')}
+  <div class="section-title">Disarankan dikerjakan juga <span class="pill">prioritas tertinggi lainnya</span></div>
+  ${listOf(recs, 'Tidak ada saran tambahan.')}
+  ${doneToday.length ? `<div class="section-title">Sudah selesai hari ini <span class="pill">${doneToday.length}</span></div>${listOf(doneToday, '', { compact: true })}` : ''}`;
+}
+function renderUpcoming() {
+  const today = todayStr(), end = addDays(today, 30);
+  const up = tasks.filter(t => isActive(t) && t.due_date && dOnly(t.due_date) > today && dOnly(t.due_date) <= end)
+    .sort((a, b) => dOnly(a.due_date) < dOnly(b.due_date) ? -1 : dOnly(a.due_date) > dOnly(b.due_date) ? 1 : cmpPriority(a, b));
+  const nodue = tasks.filter(t => isActive(t) && !t.due_date).sort(cmpPriority);
+  const later = tasks.filter(t => isActive(t) && t.due_date && dOnly(t.due_date) > end).length;
+  const groups = {}; up.forEach(t => { (groups[dOnly(t.due_date)] ||= []).push(t); });
+  let html = `<p class="muted" style="margin-top:0">Tugas aktif dengan tenggat dalam 30 hari ke depan (${fmtDate(addDays(today, 1))} – ${fmtDate(end)}).${later ? ` Ada ${later} tugas lain dengan tenggat lebih jauh.` : ''}</p>`;
+  if (!up.length) html += emptyState('Tidak ada tugas mendatang dalam 30 hari ke depan.');
+  for (const [d, arr] of Object.entries(groups)) {
+    const k = daysUntil(d); const mins = arr.reduce((a, t) => a + (Number(t.estimated_minutes) || 0), 0);
+    html += `<div class="day-group"><div class="day-h"><b>${esc(fmtDate(d, { weekday: 'long', day: 'numeric', month: 'long' }))}</b><span>${k === 1 ? 'Besok' : k + ' hari lagi'} · ${arr.length} tugas${mins ? ' · ' + fmtMin(mins) : ''}</span></div>${listOf(arr)}</div>`;
+  }
+  if (nodue.length) html += `<div class="section-title">Tanpa tenggat <span class="pill">${nodue.length}</span></div>${listOf(nodue)}`;
+  return html;
+}
+function filteredTasks() {
+  const q = ui.search.trim().toLowerCase();
+  const base = ui.src === 'own' ? tasks : ui.src === 'received' ? received : viewTasks();
+  let arr = base.filter(t => {
+    if (ui.status === 'active' && !isActive(t)) return false;
+    if ([ST.TODO, ST.DOING, ST.DONE].includes(ui.status) && st(t) !== ui.status) return false;
+    if (ui.cat && (t.category || '') !== ui.cat) return false;
+    if (ui.level && scoreOf(t).level.key !== ui.level) return false;
+    if (ui.overdue && !isOverdue(t)) return false;
+    if (q && !(`${t.title || ''} ${t.description || ''} ${t.category || ''}`.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const by = {
+    priority: cmpPriority,
+    due: (a, b) => (dOnly(a.due_date) || '9999') < (dOnly(b.due_date) || '9999') ? -1 : (dOnly(a.due_date) || '9999') > (dOnly(b.due_date) || '9999') ? 1 : cmpPriority(a, b),
+    newest: (a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')),
+    title: (a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'id')
+  }[ui.sort] || cmpPriority;
+  return arr.sort(by);
+}
+function renderAll() {
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`;
+  return `<div class="toolbar">
+    <input type="search" class="input search" data-filter="search" placeholder="Cari judul, deskripsi, kategori…" value="${esc(ui.search)}" aria-label="Cari tugas">
+    <select class="input" data-filter="cat" aria-label="Kategori">${opt('', 'Semua kategori', ui.cat)}${allCategories().map(c => opt(c, c, ui.cat)).join('')}</select>
+    <select class="input" data-filter="status" aria-label="Status">${opt('active', 'Aktif (belum selesai)', ui.status)}${opt('all', 'Semua status', ui.status)}${opt(ST.TODO, 'Belum mulai', ui.status)}${opt(ST.DOING, 'Sedang dikerjakan', ui.status)}${opt(ST.DONE, 'Selesai', ui.status)}</select>
+    <select class="input" data-filter="level" aria-label="Level prioritas">${opt('', 'Semua prioritas', ui.level)}${LEVELS.map(l => opt(l.key, l.label + ' (' + l.min + '+)', ui.level)).join('')}</select>
+    <select class="input" data-filter="sort" aria-label="Urutkan">${opt('priority', 'Urut: Prioritas', ui.sort)}${opt('due', 'Urut: Tenggat terdekat', ui.sort)}${opt('newest', 'Urut: Terbaru dibuat', ui.sort)}${opt('title', 'Urut: Judul A–Z', ui.sort)}</select>
+    <select class="input" data-filter="src" aria-label="Sumber tugas">${opt('all', 'Milik saya + diterima', ui.src)}${opt('own', 'Milik saya', ui.src)}${opt('received', 'Diterima dari orang lain', ui.src)}</select>
+    <label class="chk"><input type="checkbox" data-filter="overdue" ${ui.overdue ? 'checked' : ''}> Hanya terlambat</label>
+  </div><div id="listWrap">${allListHTML()}</div>`;
+}
+function allListHTML() {
+  const total = viewTasks().length;
+  if (!total) return emptyState('Belum ada tugas.');
+  const arr = filteredTasks();
+  return `<div class="result-info">Menampilkan ${arr.length} dari ${total} tugas${received.length ? ` (${tasks.length} milik saya · ${received.length} diterima)` : ''}</div>${listOf(arr, 'Tidak ada tugas yang cocok dengan filter.')}`;
+}
+function miniCard(t, mode) {
+  const s = scoreOf(t), id = esc(t.id), q = quadOf(t), recv = isRecv(t), locked = recv && isArchived(t);
+  // Tugas diterima: tidak bisa dipindah kuadran (prioritas milik pemilik); status lewat RPC di Kanban
+  const canDrag = !locked && !(recv && mode === 'quad');
+  const sel = locked ? '' : (recv && mode === 'quad') ? `<span class="small muted">Prioritas diatur pemilik</span>` : mode === 'quad'
+    ? `<select class="input" data-change="quad" data-id="${id}" aria-label="Pindah kuadran">${[1, 2, 3, 4].map(n => `<option value="${n}" ${n === q ? 'selected' : ''}>${QUADS[n].title}</option>`).join('')}</select>`
+    : `<select class="input" data-change="status" data-id="${id}" aria-label="Ubah status">${[ST.TODO, ST.DOING, ST.DONE].map(v => `<option value="${v}" ${v === st(t) ? 'selected' : ''}>${STATUS_LABEL[v]}</option>`).join('')}</select>`;
+  return `<div class="mini ${recv ? 'is-recv' : ''} ${canDrag ? '' : 'no-drag'}" ${canDrag ? `draggable="true" data-drag="${id}"` : ''}>
+    <div class="mini-top"><div class="mini-title" data-action="edit" data-id="${id}">${esc(t.title)}</div><span class="score" style="--lvl:${s.level.color}" title="Skor prioritas ${s.score} (${s.level.label})">${s.score}</span></div>
+    <div class="meta">${shareBadges(t)}<span class="badge">K${lvl15(t.importance)} · U${lvl15(t.urgency)} · D${lvl15(t.impact)}</span>${t.due_date ? `<span class="badge ${isOverdue(t) ? 'danger' : ''}">${esc(dueLabel(t))}</span>` : ''}${t.category ? `<span class="badge">${esc(t.category)}</span>` : ''}</div>
+    <div class="mini-move">${sel}${mode === 'quad' && !locked ? `<button class="icon-btn" data-action="toggle" data-id="${id}" title="Tandai selesai" aria-label="Tandai selesai">${svg('check', 15)}</button>` : ''}</div>
+  </div>`;
+}
+function renderMatrix() {
+  const active = viewTasks().filter(isActive);
+  const by = { 1: [], 2: [], 3: [], 4: [] }; active.forEach(t => by[quadOf(t)].push(t));
+  return `<p class="muted" style="margin-top:0">Tugas dikelompokkan otomatis: <b>Penting</b> = kepentingan ≥ ${MATRIX_THRESHOLD}, <b>Mendesak</b> = urgensi ≥ ${MATRIX_THRESHOLD}. Seret kartu ke kuadran lain (laptop) atau gunakan menu pilihan di kartu (HP). Memindahkan kartu akan menyesuaikan nilai kepentingan/urgensi dan menyimpannya ke cloud.</p>
+  <div class="matrix">${[1, 2, 3, 4].map(q => `<section class="quad" style="--qc:${QUADS[q].color}" data-drop="quad" data-value="${q}">
+    <div class="quad-h"><div><h3>${QUADS[q].title}</h3><p>${QUADS[q].sub}</p></div><span class="pill">${by[q].length}</span></div>
+    <div class="items">${by[q].sort(cmpPriority).map(t => miniCard(t, 'quad')).join('') || '<div class="muted small" style="padding:20px;text-align:center">Kosong — seret tugas ke sini</div>'}</div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px" data-action="new-quad" data-value="${q}">${svg('plus', 14)}Tambah di kuadran ini</button>
+  </section>`).join('')}</div>`;
+}
+function renderKanban() {
+  const cols = [[ST.TODO, 'Belum Mulai', 'var(--muted)'], [ST.DOING, 'Sedang Dikerjakan', 'var(--info)'], [ST.DONE, 'Selesai', 'var(--ok)']];
+  return `<p class="muted" style="margin-top:0">Seret kartu antar kolom atau ubah status lewat menu di kartu. Kolom "Selesai" menampilkan 30 tugas terakhir.</p>
+  <div class="kanban">${cols.map(([s, label, c]) => {
+    let arr = viewTasks().filter(t => st(t) === s);
+    arr = s === ST.DONE ? arr.sort((a, b) => String(b.completed_at || '').localeCompare(String(a.completed_at || ''))).slice(0, 30) : arr.sort(cmpPriority);
+    const total = viewTasks().filter(t => st(t) === s).length;
+    return `<section class="kcol" data-drop="status" data-value="${s}"><div class="kcol-h"><span class="kd" style="background:${c}"></span>${label}<span class="pill" style="margin-left:auto">${total}</span></div>
+      <div class="items">${arr.map(t => miniCard(t, 'status')).join('') || '<div class="muted small" style="padding:20px;text-align:center">Kosong</div>'}</div></section>`;
+  }).join('')}</div>`;
+}
+function renderCalendar() {
+  const y = ui.calY, m = ui.calM; const first = new Date(y, m, 1); const offset = (first.getDay() + 6) % 7;
+  const start = new Date(y, m, 1 - offset); const today = todayStr();
+  const map = {}; viewTasks().forEach(t => { const d = dOnly(t.due_date); if (d) (map[d] ||= []).push(t); });
+  Object.values(map).forEach(a => a.sort((p, q) => (isDone(p) - isDone(q)) || cmpPriority(p, q)));
+  const weeks = Math.ceil((offset + new Date(y, m + 1, 0).getDate()) / 7);
+  let cells = '';
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i); const ds = fmtD(d); const arr = map[ds] || [];
+    cells += `<button type="button" class="cal-cell ${d.getMonth() !== m ? 'other' : ''} ${ds === today ? 'today' : ''} ${ds === ui.calSel ? 'sel' : ''}" data-action="cal-day" data-date="${ds}" aria-label="${esc(fmtDate(ds))}, ${arr.length} tugas">
+      <span class="cal-num">${d.getDate()}</span>
+      ${arr.slice(0, 3).map(t => `<span class="chip lvl-${scoreOf(t).level.key} ${isDone(t) ? 'done' : ''} ${isRecv(t) ? 'recv' : ''}" title="${isRecv(t) ? 'Dari: ' + esc(senderName(t)) : ''}">${esc(t.title)}</span>`).join('')}
+      ${arr.length > 3 ? `<span class="more">+${arr.length - 3} lagi</span>` : ''}
+      ${arr.length ? `<span class="dots">${arr.slice(0, 5).map(t => `<i class="lvl-${scoreOf(t).level.key}"></i>`).join('')}</span>` : ''}
+    </button>`;
+  }
+  const sel = ui.calSel; const selArr = sel ? (map[sel] || []) : [];
+  const monthName = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(first);
+  return `<div class="cal-head"><h3>${esc(monthName)}</h3>
+    <button class="icon-btn" data-action="cal-prev" aria-label="Bulan sebelumnya">${svg('chevL')}</button>
+    <button class="btn btn-sm" data-action="cal-today">Hari ini</button>
+    <button class="icon-btn" data-action="cal-next" aria-label="Bulan berikutnya">${svg('chevR')}</button>
+    <span class="muted small" style="margin-left:auto">Klik tanggal untuk melihat atau menambah tugas</span></div>
+  <div class="cal">${['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => `<div class="cal-dow">${d}</div>`).join('')}${cells}</div>
+  ${sel ? `<div class="section-title">${esc(fmtDate(sel, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))} <span class="pill">${selArr.length} tugas</span>
+    <button class="btn btn-sm btn-primary" style="margin-left:auto;text-transform:none;letter-spacing:0" data-action="new-date" data-date="${sel}">${svg('plus', 14)}Tambah di tanggal ini</button></div>
+    ${listOf(selArr, 'Tidak ada tugas pada tanggal ini.')}` : ''}`;
+}
+function renderCompleted() {
+  const q = ui.csearch.trim().toLowerCase();
+  const all = tasks.filter(isDone);
+  const arr = all.filter(t => !q || `${t.title} ${t.description || ''} ${t.category || ''}`.toLowerCase().includes(q))
+    .sort((a, b) => String(b.completed_at || b.updated_at || '').localeCompare(String(a.completed_at || a.updated_at || '')));
+  return `<div class="toolbar"><input type="search" class="input search" data-filter="csearch" placeholder="Cari tugas selesai…" value="${esc(ui.csearch)}" aria-label="Cari tugas selesai">
+    ${all.some(t => !isShared(t)) ? `<button class="btn" data-action="delete-completed" style="color:var(--danger)">${svg('trash', 15)}Hapus semua tugas selesai</button>` : ''}</div>
+    <div id="clistWrap">${completedListHTML(arr, all.length)}</div>`;
+}
+function completedListHTML(arr, total) {
+  if (!total) return emptyState('Belum ada tugas yang selesai.', false);
+  return `<div class="result-info">Menampilkan ${arr.length} dari ${total} tugas selesai · klik ✓ untuk membuka kembali</div>${listOf(arr, 'Tidak ada yang cocok.')}`;
+}
+function renderAnalytics() {
+  const tasks = statTasks();   // M4.2a: seluruh isi Analitik mengikuti filter cakupan
+  if (!tasks.length) return scopeBar() + emptyState(ui.scope === 'all' ? 'Analitik akan muncul setelah Anda memiliki tugas.' : scopeEmpty(), false);
+  const done = tasks.filter(isDone), active = tasks.filter(isActive);
+  const doing = active.filter(t => st(t) === ST.DOING).length;
+  const avgProg = active.length ? Math.round(active.reduce((a, t) => a + progOf(t), 0) / active.length) : 0;
+  const withDue = done.filter(t => t.due_date && t.completed_at);
+  const onTime = withDue.filter(t => localDateOfISO(t.completed_at) <= dOnly(t.due_date)).length;
+  const avgEst = (() => { const a = tasks.filter(t => Number(t.estimated_minutes) > 0); return a.length ? Math.round(a.reduce((s, t) => s + Number(t.estimated_minutes), 0) / a.length) : 0; })();
+  const pct = Math.round(done.length / tasks.length * 100);
+  // 8 weeks
+  const [ws] = weekRange(); const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const s = addDays(ws, -7 * i), e = addDays(s, 6);
+    const v = done.filter(t => { const d = localDateOfISO(t.completed_at); return d && d >= s && d <= e; }).length;
+    weeks.push({ label: fmtDate(s, { day: 'numeric', month: 'short' }), title: `${fmtDate(s)} – ${fmtDate(e)}`, value: v, cls: i === 0 ? 'today' : '' });
+  }
+  const lvlItems = LEVELS.map(l => ({ label: l.label, value: active.filter(t => scoreOf(t).level.key === l.key).length, color: l.color }));
+  const qItems = [1, 2, 3, 4].map(q => ({ label: QUADS[q].title, value: active.filter(t => quadOf(t) === q).length, color: QUADS[q].color }));
+  const recItems = Object.keys(REC_LABEL).map(r => ({ label: REC_LABEL[r], value: tasks.filter(t => recOf(t) === r && isActive(t)).length }));
+  const cats = {}; tasks.forEach(t => { const c = t.category || 'Tanpa kategori'; cats[c] ||= { a: 0, d: 0, m: 0 }; isDone(t) ? cats[c].d++ : (cats[c].a++, cats[c].m += Number(t.estimated_minutes) || 0); });
+  const catRows = Object.entries(cats).sort((a, b) => (b[1].a + b[1].d) - (a[1].a + a[1].d));
+  return `${scopeBar()}<div class="grid stats">
+    ${statCard('Total tugas', tasks.length, `${active.length} aktif · ${done.length} selesai`, 'pri', 'list')}
+    ${statCard('Selesai', done.length, 'Status Selesai', 'ok', 'completed')}
+    ${statCard('Sedang dikerjakan', doing, `${active.length - doing} aktif lainnya belum dimulai/menunggu`, '', 'clock')}
+    ${statCard('Terlambat saat ini', active.filter(isOverdue).length, '', active.filter(isOverdue).length ? 'danger' : '', 'alert')}
+    ${statCard('Tingkat penyelesaian', pct + '%', `${done.length} dari ${tasks.length} tugas`, 'ok', 'target')}
+    ${statCard('Tepat waktu', withDue.length ? Math.round(onTime / withDue.length * 100) + '%' : '–', `${onTime} dari ${withDue.length} tugas bertenggat`, 'ok', 'target')}
+    ${statCard('Progres rata-rata', avgProg + '%', `${active.length} tugas aktif`, 'pri', 'flame')}
+    ${statCard('Rata-rata estimasi', avgEst ? fmtMin(avgEst) : '–', 'Per tugas', '', 'clock')}
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><div class="card-h"><h3>Tugas selesai per minggu</h3><span class="pill">8 minggu terakhir</span></div>${vbars(weeks)}</div>
+    <div class="card"><div class="card-h"><h3>Tingkat penyelesaian</h3></div><div class="ring" style="--p:${pct}"><span>${pct}%</span></div><p class="muted small" style="text-align:center;margin-bottom:0">${done.length} dari ${tasks.length} tugas telah diselesaikan</p></div>
+  </div>
+  <div class="grid g2e" style="margin-top:16px">
+    <div class="card"><div class="card-h"><h3>Level prioritas</h3><span class="pill">tugas aktif</span></div>${hbars(lvlItems)}</div>
+    <div class="card"><div class="card-h"><h3>Matriks Eisenhower</h3><span class="pill">tugas aktif</span></div>${hbars(qItems)}</div>
+    <div class="card"><div class="card-h"><h3>Jenis pengulangan</h3><span class="pill">tugas aktif</span></div>${hbars(recItems)}</div>
+    <div class="card"><div class="card-h"><h3>Status</h3></div>${hbars([ST.TODO, ST.DOING, ST.DONE].map(s => ({ label: STATUS_LABEL[s], value: tasks.filter(t => st(t) === s).length, color: s === ST.DONE ? 'var(--ok)' : s === ST.DOING ? 'var(--info)' : 'var(--muted)' })))}</div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h3>Ringkasan per kategori</h3></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Kategori</th><th style="text-align:right">Aktif</th><th style="text-align:right">Selesai</th><th style="text-align:right">% Selesai</th><th style="text-align:right">Sisa estimasi</th></tr></thead><tbody>
+    ${catRows.map(([c, v]) => `<tr><td>${esc(c)}</td><td class="n">${v.a}</td><td class="n">${v.d}</td><td class="n">${Math.round(v.d / (v.a + v.d) * 100)}%</td><td class="n">${v.m ? fmtMin(v.m) : '–'}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+/* ------------------------- M4: tampilan berbagi ------------------------- */
+function renderMine() {
+  const active = tasks.filter(isActive).sort(cmpPriority), done = tasks.filter(isDone).length;
+  const sharedN = tasks.filter(t => isShared(t) && isActive(t)).length;
+  return `<p class="muted" style="margin-top:0">Semua tugas milik Anda — pribadi maupun yang Anda bagikan${sharedN ? ` (${sharedN} sedang dibagikan)` : ''}. Tugas yang diterima dari orang lain ada di menu <b>Ditugaskan ke Saya</b>.</p>
+    <div class="section-title">Aktif <span class="pill">${active.length}</span>${done ? `<span class="pill">${done} selesai — lihat menu Selesai</span>` : ''}</div>
+    ${active.length ? listOf(active) : emptyState('Belum ada tugas aktif milik Anda.')}`;
+}
+function renderReceived() {
+  const act = received.filter(isActive).sort(cmpPriority);
+  const done = received.filter(isDone).sort((a, b) => String(b.completed_at || '').localeCompare(String(a.completed_at || '')));
+  if (!received.length) return `<div class="empty card"><div class="em-ic">📥</div><div>Belum ada tugas yang dibagikan kepada Anda.</div><div class="small" style="margin-top:6px">Tugas yang dikirim pengguna lain akan muncul di sini dan juga di Semua Tugas, Kalender, Kanban, dan Matriks.</div></div>`;
+  return `<p class="muted" style="margin-top:0">Tugas dari pengguna lain. Anda dapat mengubah <b>status &amp; progres</b>, menulis catatan, mengalihkan, atau menolak (buka detail tugas); isi tugas hanya dapat diubah pemiliknya. Pemilik dapat melihat setiap perubahan Anda.</p>
+    <div class="section-title">Aktif <span class="pill">${act.length}</span></div>${listOf(act, 'Tidak ada tugas aktif yang diterima.')}
+    ${done.length ? `<div class="section-title">Selesai <span class="pill">${done.length}</span></div>${listOf(done, '', { compact: true })}` : ''}`;
+}
+function renderSent() {
+  const mine = tasks.filter(isShared);
+  if (!mine.length) return `<div class="empty card"><div class="em-ic">📤</div><div>Anda belum membagikan tugas kepada siapa pun.</div><div class="small" style="margin-top:6px">Buka tugas milik Anda lalu tekan <b>Bagikan</b> (ikon berbagi di kartu atau di detail tugas).</div></div>`;
+  const rows = mine.slice().sort((a, b) => (isDone(a) - isDone(b)) || cmpPriority(a, b));
+  return `<p class="muted" style="margin-top:0">Tugas milik Anda yang sedang dibagikan. Status dan progres diperbarui oleh penerima; tekan muat ulang untuk melihat pembaruan terbaru. Klik judul untuk melihat riwayat, mengalihkan, atau mencabut.</p>
+    <div class="card" style="margin-bottom:16px"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tugas</th><th>Penerima</th><th>Status</th><th style="text-align:right">Progres</th><th>Tenggat</th></tr></thead><tbody>
+    ${rows.map(t => `<tr><td><button class="link-btn" data-action="edit" data-id="${esc(t.id)}">${esc(t.title)}</button></td><td>${esc(recipientName(t))}</td><td>${STATUS_LABEL[st(t)]}</td><td class="n">${progOf(t)}%<span class="sent-bar"><i style="width:${progOf(t)}%"></i></span></td><td>${t.due_date ? `<span class="${isOverdue(t) ? 'badge danger' : ''}">${esc(dueLabel(t))}</span>` : '–'}</td></tr>`).join('')}
+    </tbody></table></div></div>
+    ${listOf(rows, '', { compact: true })}`;
+}
+function renderBackup() {
+  const cfg = getConfig();
+  return `<div class="grid g2e">
+    <div class="card"><div class="card-h"><h3>Ekspor data</h3></div>
+      <p class="muted" style="margin-top:0">Unduh salinan seluruh tugas milik Anda (${ownTasks().length} tugas). Simpan file JSON sebagai cadangan yang bisa dipulihkan; CSV untuk dibuka di Excel/Google Sheets.${received.length ? ` Tugas yang diterima dari orang lain (${received.length}) tidak ikut diekspor.` : ''}</p>
+      <div class="backup-actions"><button class="btn btn-primary" data-action="export-json">${svg('backup', 16)}Ekspor JSON</button><button class="btn" data-action="export-csv">${svg('backup', 16)}Ekspor CSV</button></div></div>
+    <div class="card"><div class="card-h"><h3>Impor / pulihkan dari JSON</h3></div>
+      <p class="muted" style="margin-top:0">Data divalidasi terlebih dahulu. Tugas yang sudah ada (judul + tenggat + kategori sama) akan dilewati agar tidak ganda.</p>
+      <div class="import-box"><input type="file" id="importFile" accept=".json,application/json" class="hidden">
+        <button class="btn" data-action="pick-import">${svg('upload', 16)}Pilih file JSON</button><div class="small muted" style="margin-top:6px">Maks. 5 MB · format hasil Ekspor JSON aplikasi ini</div></div>
+      <div id="importReport" class="import-report"></div></div>
+    <div class="card"><div class="card-h"><h3>Pembersihan data</h3></div>
+      <p class="muted" style="margin-top:0">Hapus permanen semua tugas <b>pribadi</b> berstatus Selesai (${deletableDone().length} tugas). Tugas yang Anda bagikan tidak ikut terhapus agar riwayat penerima tetap aman. Disarankan ekspor dulu sebagai cadangan.</p>
+      <button class="btn" style="color:var(--danger)" data-action="delete-completed" ${deletableDone().length ? '' : 'disabled'}>${svg('trash', 15)}Hapus tugas selesai</button></div>
+    <div class="card"><div class="card-h"><h3>Akun &amp; tampilan</h3></div>
+      <p style="margin-top:0">Masuk sebagai <b>${esc(user?.email || '')}</b></p>
+      <p class="muted small">Sinkronisasi: data dimuat dari Supabase saat aplikasi dibuka, saat Anda kembali ke tab ini, setiap 5 menit selama tab aktif, dan saat tombol muat ulang ditekan. Perubahan dari perangkat lain tidak tampil seketika.</p>
+      <div class="backup-actions">
+        <button class="btn" data-action="theme">${svg(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon', 16)}Ganti ke mode ${document.documentElement.dataset.theme === 'dark' ? 'terang' : 'gelap'}</button>
+        <button class="btn" data-action="refresh">${svg('refresh', 16)}Muat ulang data</button>
+        <button class="btn" data-action="test-conn">${svg('target', 16)}Tes koneksi Supabase</button>
+        ${cfg?.src === 'local' ? `<button class="btn" data-action="reset-config">Ubah konfigurasi Supabase</button>` : ''}
+        <button class="btn" data-action="logout">${svg('logout', 16)}Keluar</button>
+      </div><div id="connReport" class="import-report"></div></div>
+  </div>`;
+}
+
+/* ------------------------- Render dispatcher ------------------------- */
+function buildNav() {
+  $('#nav').innerHTML = VIEWS.map(([k, label, ic]) => `${NAV_GROUPS[k] ? `<div class="nav-label">${NAV_GROUPS[k]}</div>` : ''}<button class="nav-item" data-view="${k}">${svg(ic)}<span>${label}</span><span class="count hidden" id="cnt-${k}"></span></button>`).join('');
+}
+function updateCounts() {
+  const today = todayStr();
+  const set = (k, v, alert) => { const el = $('#cnt-' + k); if (!el) return; el.textContent = v; el.classList.toggle('hidden', !v); el.classList.toggle('alert', !!alert); };
+  const od = tasks.filter(isOverdue).length;
+  set('today', tasks.filter(t => isActive(t) && dOnly(t.due_date) <= today && t.due_date).length, od > 0);
+  set('all', viewTasks().filter(isActive).length);
+  set('completed', tasks.filter(isDone).length);
+  set('mine', tasks.filter(isActive).length);
+  set('received', received.filter(isActive).length);
+  set('sent', tasks.filter(t => isShared(t) && isActive(t)).length);
+}
+function render() {
+  if ($('#appScreen').classList.contains('hidden')) return;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  const title = (VIEWS.find(v => v[0] === view) || VIEWS[0])[1];
+  $('#viewTitle').textContent = title; document.title = title + ' · Productivity Hub';
+  const fn = { dashboard: renderDashboard, today: renderToday, upcoming: renderUpcoming, all: renderAll, matrix: renderMatrix,
+    kanban: renderKanban, calendar: renderCalendar, completed: renderCompleted, analytics: renderAnalytics, backup: renderBackup,
+    mine: renderMine, received: renderReceived, sent: renderSent }[view] || renderDashboard;
+  const scrollY = window.scrollY;
+  $('#view').innerHTML = (!loadedOnce && view !== 'backup') ? skeleton() : fn();
+  window.scrollTo(0, scrollY);
+  updateCounts();
+}
+function go(v) {
+  view = v; closeSidebar(); window.scrollTo(0, 0); render();
+  try { localStorage.setItem('pph_view', v); } catch {}
+}
+function openSidebar() { $('#sidebar').classList.add('open'); $('#overlay').classList.remove('hidden'); }
+function closeSidebar() { $('#sidebar').classList.remove('open'); $('#overlay').classList.add('hidden'); }
+
+/* ------------------------- Backup ------------------------- */
+const FIELDS = ['id','user_id','title','description','category','status','importance','urgency','impact','due_date','estimated_minutes','recurrence','completed_at','created_at','updated_at'];
+function download(name, content, mime) {
+  const blob = new Blob([content], { type: mime }); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+/* M4: ekspor/impor/hapus massal HANYA memproses tugas milik sendiri (saringan ganda) */
+const ownTasks = () => tasks.filter(t => !isRecv(t) && user && t.user_id === user.id);
+const deletableDone = () => ownTasks().filter(t => isDone(t) && !isShared(t));
+function exportJSON() {
+  const own = ownTasks();
+  if (!own.length) return toast('Tidak ada tugas untuk diekspor.', 'error');
+  const data = { app: 'Personal Productivity Hub', version: 1, exported_at: new Date().toISOString(), count: own.length,
+    tasks: own.map(t => Object.fromEntries(FIELDS.filter(f => f !== 'user_id').map(f => [f, t[f] ?? null]))) };
+  download(`productivity-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
+  toast(`${own.length} tugas diekspor ke JSON`);
+}
+function csvCell(v) {
+  let s = v == null ? '' : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; // cegah formula injection di Excel
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function exportCSV() {
+  const own = ownTasks();
+  if (!own.length) return toast('Tidak ada tugas untuk diekspor.', 'error');
+  const cols = FIELDS.filter(f => f !== 'user_id');
+  const head = [...cols, 'priority_score', 'priority_level', 'eisenhower_quadrant'];
+  const rows = own.slice().sort(cmpPriority).map(t => { const s = scoreOf(t); return [...cols.map(c => t[c]), s.score, s.level.label, 'Q' + quadOf(t)].map(csvCell).join(','); });
+  download(`productivity-tasks-${todayStr()}.csv`, '﻿' + [head.join(','), ...rows].join('\r\n'), 'text/csv;charset=utf-8');
+  toast(`${own.length} tugas diekspor ke CSV`);
+}
+const dupKey = t => [String(t.title || '').trim().toLowerCase(), dOnly(t.due_date) || '', String(t.category || '').trim().toLowerCase()].join('|');
+function cleanRow(r) {
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return { error: 'bukan objek tugas' };
+  const title = typeof r.title === 'string' ? r.title.trim() : '';
+  if (!title) return { error: 'judul kosong' };
+  if (title.length > 200) return { error: 'judul lebih dari 200 karakter' };
+  const lv = (v, name) => { if (v == null || v === '') return { v: 3 }; const n = Number(v); if (!Number.isInteger(n) || n < 1 || n > 5) return { error: `${name} harus 1–5` }; return { v: n }; };
+  const imp = lv(r.importance, 'importance'), urg = lv(r.urgency, 'urgency'), ipc = lv(r.impact, 'impact');
+  for (const x of [imp, urg, ipc]) if (x.error) return { error: x.error };
+  let status = String(r.status ?? ST.TODO).toLowerCase().trim();
+  const sMap = { todo: ST.TODO, 'to do': ST.TODO, pending: ST.TODO, 'belum mulai': ST.TODO, in_progress: ST.DOING, 'in progress': ST.DOING, doing: ST.DOING, dikerjakan: ST.DOING, done: ST.DONE, completed: ST.DONE, selesai: ST.DONE };
+  if (!(status in sMap)) return { error: `status "${r.status}" tidak dikenal` };
+  status = sMap[status];
+  let rec = String(r.recurrence ?? RECUR.NONE).toLowerCase().trim() || RECUR.NONE;
+  const rMap = { none: RECUR.NONE, null: RECUR.NONE, once: RECUR.NONE, 'one-time': RECUR.NONE, sekali: RECUR.NONE, daily: RECUR.DAILY, harian: RECUR.DAILY, weekly: RECUR.WEEKLY, mingguan: RECUR.WEEKLY, monthly: RECUR.MONTHLY, bulanan: RECUR.MONTHLY };
+  if (!(rec in rMap)) return { error: `recurrence "${r.recurrence}" tidak dikenal` };
+  rec = rMap[rec];
+  let due = null;
+  if (r.due_date != null && r.due_date !== '') { if (!parseD(r.due_date)) return { error: `tanggal "${r.due_date}" tidak valid` }; due = dOnly(r.due_date); }
+  let est = null;
+  if (r.estimated_minutes != null && r.estimated_minutes !== '') { const n = Number(r.estimated_minutes); if (!Number.isInteger(n) || n < 0 || n > 100000) return { error: 'estimated_minutes harus bilangan bulat 0–100000' }; est = n; }
+  if (r.description != null && typeof r.description !== 'string') return { error: 'deskripsi harus teks' };
+  if (r.category != null && typeof r.category !== 'string') return { error: 'kategori harus teks' };
+  let completed = null;
+  if (status === ST.DONE) { const d = r.completed_at ? new Date(r.completed_at) : null; completed = d && !isNaN(d) ? d.toISOString() : new Date().toISOString(); }
+  return { row: { title, description: (r.description || '').slice(0, 5000) || null, category: (r.category || '').trim().slice(0, 60) || null, status,
+    importance: imp.v, urgency: urg.v, impact: ipc.v, due_date: due, estimated_minutes: est, recurrence: rec, completed_at: completed } };
+}
+async function handleImportFile(file) {
+  const rep = $('#importReport'); pendingImport = null;
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { rep.innerHTML = '<div class="msg error">File terlalu besar (maks. 5 MB).</div>'; return; }
+  let raw;
+  try { raw = JSON.parse(await file.text()); } catch { rep.innerHTML = '<div class="msg error">File bukan JSON yang valid.</div>'; return; }
+  const arr = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.tasks) ? raw.tasks : null);
+  if (!arr) { rep.innerHTML = '<div class="msg error">Format tidak dikenali. File harus berisi daftar tugas atau objek {"tasks": [...]} hasil ekspor aplikasi ini.</div>'; return; }
+  if (arr.length > 5000) { rep.innerHTML = '<div class="msg error">Maksimal 5000 tugas per impor.</div>'; return; }
+  const existing = new Set(ownTasks().map(dupKey)), seen = new Set(); const valid = [], dups = [], invalid = [];
+  arr.forEach((r, i) => {
+    const c = cleanRow(r); if (c.error) { invalid.push(`Data #${i + 1}: ${c.error}`); return; }
+    const k = dupKey(c.row); if (existing.has(k) || seen.has(k)) { dups.push(c.row.title); return; }
+    seen.add(k); valid.push(c.row);
+  });
+  pendingImport = valid;
+  rep.innerHTML = `<div class="msg ${valid.length ? 'info' : 'error'}"><b>${esc(file.name)}</b>: ${arr.length} data dibaca.<br>✔ ${valid.length} siap diimpor · ⧉ ${dups.length} duplikat dilewati · ✖ ${invalid.length} tidak valid</div>
+    ${invalid.length ? `<details><summary class="small">Lihat data tidak valid</summary><ul>${invalid.slice(0, 50).map(x => `<li>${esc(x)}</li>`).join('')}${invalid.length > 50 ? '<li>…</li>' : ''}</ul></details>` : ''}
+    ${dups.length ? `<details><summary class="small">Lihat duplikat</summary><ul>${dups.slice(0, 50).map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>` : ''}
+    ${valid.length ? `<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" data-action="confirm-import">Impor ${valid.length} tugas</button><button class="btn" data-action="cancel-import">Batal</button></div>` : ''}`;
+}
+async function confirmImport() {
+  if (!pendingImport || !pendingImport.length) return;
+  const rows = pendingImport; let ok = 0;
+  busy(true);
+  try {
+    for (let i = 0; i < rows.length; i += 200) { const d = await insertTasks(rows.slice(i, i + 200)); ok += d.length; }
+    toast(`${ok} tugas berhasil diimpor`);
+  } catch (e) { toast(`Impor berhenti setelah ${ok} tugas: ` + dbErr(e), 'error'); }
+  finally { busy(false); pendingImport = null; await loadTasks(true); }
+}
+async function deleteCompleted() {
+  const done = deletableDone(); if (!done.length) return;
+  const skipped = ownTasks().filter(t => isDone(t) && isShared(t)).length;
+  const ok = await confirmDialog(`Hapus permanen ${done.length} tugas pribadi yang sudah selesai?${skipped ? ` ${skipped} tugas selesai yang sedang Anda bagikan TIDAK ikut dihapus.` : ''} Tindakan ini tidak dapat dibatalkan. Disarankan ekspor JSON terlebih dahulu.`, { title: 'Hapus tugas selesai', yes: `Hapus ${done.length} tugas` });
+  if (!ok) return;
+  busy(true);
+  try {
+    const ids = done.map(t => t.id); let n = 0;
+    for (let i = 0; i < ids.length; i += 200) {
+      const { data, error } = await sb.from('tasks').delete().in('id', ids.slice(i, i + 200)).eq('user_id', user.id).eq('visibility', 'private').select('id');
+      if (error) throw error; n += (data || []).length;
+    }
+    toast(`${n} tugas selesai dihapus`);
+  } catch (e) { toast('Gagal menghapus: ' + dbErr(e), 'error'); }
+  finally { busy(false); await loadTasks(true); }
+}
+
+/* ------------------------- Connection test ------------------------- */
+async function testConnection() {
+  const box = $('#connReport'); if (!box) return;
+  const lines = []; const add = (ok, text) => { lines.push(`<li>${ok === true ? '✅' : ok === false ? '❌' : '⚠️'} ${esc(text)}</li>`); box.innerHTML = `<div class="msg info"><b>Hasil tes koneksi</b><ul style="color:inherit;max-height:none">${lines.join('')}</ul></div>`; };
+  box.innerHTML = '<div class="msg info">Menguji koneksi…</div>'; busy(true);
+  let tmpId = null;
+  try {
+    add(true, `Project: ${getConfig()?.url || '-'}`);
+    const { data: s, error: se } = await sb.auth.getSession();
+    if (se || !s?.session) { add(false, 'Tidak ada sesi login. Silakan keluar lalu masuk kembali.'); return; }
+    add(true, `Login aktif sebagai ${s.session.user.email}`);
+    const { count, error: ce } = await sb.from('tasks').select('id', { count: 'exact', head: true });
+    if (ce) { add(false, 'Gagal membaca tabel tasks: ' + dbErr(ce)); return; }
+    add(true, `Membaca tabel tasks berhasil: ${count ?? 0} tugas terlihat oleh akun ini`);
+    // M4: tugas milik orang lain BOLEH terlihat hanya jika Dibagikan & penerimanya akun ini
+    const { data: other, error: oe } = await sb.from('tasks').select('id,visibility').neq('user_id', user.id).limit(1000);
+    if (oe) add(false, 'Gagal memeriksa tugas pengguna lain: ' + dbErr(oe));
+    else {
+      const { data: mineAsg, error: ae } = await sb.from('task_assignees').select('task_id').eq('user_id', user.id);
+      const mySet = new Set((mineAsg || []).map(r => String(r.task_id)));
+      const bad = other.filter(t => t.visibility !== 'shared' || (!ae && !mySet.has(String(t.id))));
+      if (bad.length) add(false, `Terlihat ${bad.length} tugas pengguna lain yang BUKAN dibagikan kepada Anda — RLS bermasalah! Hentikan pemakaian & hubungi admin.`);
+      else add(true, other.length ? `RLS: ${other.length} tugas pengguna lain terlihat, semuanya memang dibagikan kepada Anda` : 'RLS: tidak ada tugas milik pengguna lain yang terlihat');
+    }
+    const stamp = new Date().toISOString();
+    const ins = await sb.from('tasks').insert({ title: '[Tes koneksi] boleh dihapus', user_id: user.id, status: ST.TODO, importance: 3, urgency: 3, impact: 3, recurrence: RECUR.NONE, due_date: todayStr(), updated_at: stamp }).select('id, created_at').single();
+    if (ins.error) { add(false, 'Gagal MENAMBAH tugas: ' + dbErr(ins.error)); return; }
+    tmpId = ins.data.id; add(true, `Menambah tugas berhasil (id ${tmpId})`);
+    if (!ins.data.created_at) add(null, 'Kolom created_at kosong — sebaiknya diberi default now() (lihat supabase-setup.sql)');
+    const up = await sb.from('tasks').update({ status: ST.DONE, completed_at: stamp, updated_at: stamp }).eq('id', tmpId).select('id');
+    add(!up.error && up.data?.length > 0, up.error ? 'Gagal MENGEDIT / menyelesaikan tugas: ' + dbErr(up.error) : up.data?.length ? 'Mengedit & menyelesaikan tugas berhasil' : 'Edit tidak berpengaruh (diblokir RLS?)');
+    const del = await sb.from('tasks').delete().eq('id', tmpId).select('id');
+    if (!del.error && del.data?.length) { tmpId = null; add(true, 'Menghapus tugas berhasil'); }
+    else add(false, 'Gagal MENGHAPUS tugas uji' + (del.error ? ': ' + dbErr(del.error) : ' (diblokir RLS?)') + ' — hapus manual tugas "[Tes koneksi]"');
+    add(true, 'Selesai. Data disimpan di Supabase (cloud), bukan di browser.');
+  } catch (e) { add(false, 'Kesalahan: ' + dbErr(e)); }
+  finally { busy(false); if (tmpId) await loadTasks(true); }
+}
+
+/* ------------------------- Events ------------------------- */
+function bindEvents() {
+  document.addEventListener('click', async e => {
+    const nav = e.target.closest('.nav-item[data-view]'); if (nav) return go(nav.dataset.view);
+    const el = e.target.closest('[data-action]'); if (!el) return;
+    const a = el.dataset.action, id = el.dataset.id;
+    switch (a) {
+      case 'new': return openTaskModal();
+      case 'new-quad': { const q = +el.dataset.value; return openTaskModal(null, { importance: (q === 1 || q === 2) ? 4 : 2, urgency: (q === 1 || q === 3) ? 4 : 2 }); }
+      case 'new-date': return openTaskModal(null, { due_date: el.dataset.date });
+      case 'edit': { const t = byId(id); if (t) openTaskModal(t); return; }
+      case 'delete': return deleteTask(id);
+      case 'share-open': { const t = byId(id); if (!t) return; if (canShare(t)) return shareTask(id); openTaskModal(t); setTimeout(() => $('#collabBox')?.scrollIntoView({ behavior: 'smooth' }), 80); return; }
+      case 'share': return shareTask(id);
+      case 'scope': if (SCOPES[el.dataset.value]) { ui.scope = el.dataset.value; render(); } return;
+      case 'revoke': return revokeShare(id);
+      case 'decline': return declineTask(id);
+      case 'handover': return handoverTask(id);
+      case 'save-progress': return saveProgress(id);
+      case 'add-note': return addNote(id);
+      case 'delete-from-modal': { const tid = editingId; closeTaskModal(); const ok = await deleteTask(tid); if (ok === false && byId(tid)) openTaskModal(byId(tid)); return; }
+      case 'toggle': return toggleDone(id);
+      case 'start': return setStatus(id, ST.DOING);
+      case 'close-modal': return closeTaskModal();
+      case 'refresh': { const ok = await loadTasks(); if (ok) toast('Data terbaru dimuat dari cloud'); return; }
+      case 'theme': applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); if (view === 'backup') render(); return;
+      case 'menu': return openSidebar();
+      case 'logout': { const ok = await confirmDialog('Keluar dari akun ini?', { title: 'Keluar', yes: 'Keluar', danger: false }); if (ok) { await sb.auth.signOut(); toast('Anda telah keluar'); } return; }
+      case 'reset-config': {
+        const ok = await confirmDialog('Hapus konfigurasi Supabase dari browser ini? Anda harus memasukkan URL dan key lagi. Data di cloud tidak terhapus.', { title: 'Ubah konfigurasi', yes: 'Hapus konfigurasi' });
+        if (ok) { try { if (sb) await sb.auth.signOut(); } catch {} try { localStorage.removeItem('pph_config'); } catch {} location.reload(); } return;
+      }
+      case 'cal-prev': ui.calM--; if (ui.calM < 0) { ui.calM = 11; ui.calY--; } return render();
+      case 'cal-next': ui.calM++; if (ui.calM > 11) { ui.calM = 0; ui.calY++; } return render();
+      case 'cal-today': { const d = new Date(); ui.calY = d.getFullYear(); ui.calM = d.getMonth(); ui.calSel = todayStr(); return render(); }
+      case 'cal-day': ui.calSel = el.dataset.date; render(); const sec = document.querySelector('#view .section-title'); if (sec && window.innerWidth < 900) sec.scrollIntoView({ behavior: 'smooth' }); return;
+      case 'export-json': return exportJSON();
+      case 'export-csv': return exportCSV();
+      case 'pick-import': return $('#importFile')?.click();
+      case 'confirm-import': return confirmImport();
+      case 'cancel-import': pendingImport = null; $('#importReport').innerHTML = ''; return;
+      case 'delete-completed': return deleteCompleted();
+      case 'test-conn': return testConnection();
+    }
+  });
+  document.addEventListener('change', e => {
+    const el = e.target;
+    if (el.id === 'importFile') { handleImportFile(el.files[0]); el.value = ''; return; }
+    if (el.dataset.change === 'quad') return moveQuadrant(el.dataset.id, el.value);
+    if (el.dataset.change === 'status') return setStatus(el.dataset.id, el.value);
+    if (el.dataset.filter && el.dataset.filter !== 'search' && el.dataset.filter !== 'csearch') {
+      ui[el.dataset.filter] = el.type === 'checkbox' ? el.checked : el.value;
+      $('#listWrap').innerHTML = allListHTML();
+    }
+  });
+  document.addEventListener('input', e => {
+    const f = e.target.dataset.filter;
+    if (f === 'search') { ui.search = e.target.value; $('#listWrap').innerHTML = allListHTML(); }
+    if (f === 'csearch') { ui.csearch = e.target.value; const q = ui.csearch.trim().toLowerCase(); const all = tasks.filter(isDone);
+      const arr = all.filter(t => !q || `${t.title} ${t.description || ''} ${t.category || ''}`.toLowerCase().includes(q)).sort((a, b) => String(b.completed_at || '').localeCompare(String(a.completed_at || '')));
+      $('#clistWrap').innerHTML = completedListHTML(arr, all.length); }
+    if (['fImp', 'fUrg', 'fImpact', 'fDue', 'fTitle'].includes(e.target.id)) updatePreview();
+    if (e.target.id === 'fProg') $('#vProg').textContent = e.target.value + '%';
+  });
+  // Drag & drop (matrix + kanban)
+  let dragId = null;
+  document.addEventListener('dragstart', e => { const c = e.target.closest?.('[data-drag]'); if (!c) return; dragId = c.dataset.drag; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch {} });
+  document.addEventListener('dragend', e => { e.target.closest?.('[data-drag]')?.classList.remove('dragging'); document.querySelectorAll('.over').forEach(x => x.classList.remove('over')); });
+  document.addEventListener('dragover', e => { const z = e.target.closest?.('[data-drop]'); if (!z || !dragId) return; e.preventDefault(); document.querySelectorAll('.over').forEach(x => x !== z && x.classList.remove('over')); z.classList.add('over'); });
+  document.addEventListener('drop', e => {
+    const z = e.target.closest?.('[data-drop]'); if (!z || !dragId) return; e.preventDefault(); z.classList.remove('over');
+    const id = dragId; dragId = null;
+    if (z.dataset.drop === 'quad') moveQuadrant(id, z.dataset.value); else setStatus(id, z.dataset.value);
+  });
+  $('#overlay').addEventListener('click', closeSidebar);
+  $('#taskForm').addEventListener('submit', saveTaskForm);
+  $('#taskModal').addEventListener('mousedown', e => { if (e.target.id === 'taskModal') closeTaskModal(); });
+  ['fStatus', 'fRec', 'fImp', 'fUrg', 'fImpact', 'fDue'].forEach(id => $('#' + id).addEventListener('change', updatePreview));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { if (!$('#confirmModal').classList.contains('hidden')) $('#cfNo').click(); else if (!$('#actModal').classList.contains('hidden')) closeActModal(); else if (!$('#taskModal').classList.contains('hidden')) closeTaskModal(); else closeSidebar(); }
+    const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '');
+    if (!typing && e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey && user && !$('#appScreen').classList.contains('hidden') && $('#taskModal').classList.contains('hidden') && $('#actModal').classList.contains('hidden')) { e.preventDefault(); openTaskModal(); }
+  });
+  // Sinkronisasi: muat ulang saat kembali ke tab / online / berkala
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && user && (!lastSync || Date.now() - lastSync > 15000)) loadTasks(true);
+  });
+  window.addEventListener('focus', () => { if (user && lastSync && Date.now() - lastSync > 60000) loadTasks(true); });
+  window.addEventListener('online', () => { if (user) { toast('Koneksi kembali — memuat data terbaru'); loadTasks(true); } });
+  window.addEventListener('offline', () => { setSync('error'); toast('Anda sedang offline. Perubahan tidak dapat disimpan.', 'error'); });
+  setInterval(() => { if (user && document.visibilityState === 'visible') loadTasks(true); }, 5 * 60 * 1000);
+  // Ganti hari (lewat tengah malam) → render ulang agar label "hari ini" benar
+  let lastDay = todayStr();
+  setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); render(); } }, 60 * 1000);
+}
+
+/* ------------------------- Init ------------------------- */
+function init() {
+  let theme = null; try { theme = localStorage.getItem('pph_theme'); } catch {}
+  applyTheme(theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  try { const v = localStorage.getItem('pph_view'); if (v && VIEWS.some(x => x[0] === v)) view = v; } catch {}
+  buildNav(); fillIcons(); bindAuth(); bindEvents();
+  const cfg = getConfig();
+  if (!cfg) { show('setup'); return; }
+  const prob = keyProblem(cfg.key);
+  if (prob) { show('setup'); $('#setupMsg').innerHTML = `<div class="msg error">${esc(prob)}</div>`; return; }
+  startSupabase(cfg);
+}
+init();
+</script>
+</body>
+</html>
